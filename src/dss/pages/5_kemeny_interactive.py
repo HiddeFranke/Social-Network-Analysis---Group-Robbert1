@@ -34,18 +34,15 @@ def page() -> None:
         # Plot the history of Kemeny values as nodes are removed sequentially
         st.subheader("Kemeny constant after each removal")
         fig, ax = plt.subplots()
-        x_vals = list(range(0, len(result.history) + 1))
-        ax.plot(x_vals, list(base_k, result.history), marker="o")
+        x_vals = list(range(1, len(result.history) + 1))
+        ax.plot(x_vals, result.history, marker="o")
         ax.set_xlabel("Number of removed nodes")
         ax.set_ylabel("Kemeny constant")
         ax.set_title("Kemeny constant versus number of removed nodes")
         st.pyplot(fig)
-    else:
-        st.info("Select nodes from the list above to remove them and recompute the Kemeny constant.")
-    
-    # Show the current network with removed nodes highlighted
-    st.subheader("Network view (removed nodes highlighted)")
-    if selected:
+        
+        # Show the current network with removed nodes highlighted
+        st.subheader("Network view (removed nodes highlighted)")
         display_network(
             G,
             node_size=None,
@@ -55,14 +52,9 @@ def page() -> None:
             show_labels=True,
         )
     else:
-        display_network(
-            G,
-            node_size=None,
-            node_color=None,
-            highlight=[],
-            title="Network (no removals yet)",
-            show_labels=True,
-        )
+        st.info("Select nodes from the list above to remove them and recompute the Kemeny constant.")
+    
+    
     
 
 
