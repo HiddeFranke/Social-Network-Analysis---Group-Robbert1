@@ -342,10 +342,12 @@ def page() -> None:
     label_to_edge = _build_label_to_edge(G)
     all_labels = list(label_to_edge.keys())
 
-    # --- FIX: separate "state" from widget key ---
+    # --- Selected edges state (source of truth) ---
     if "kemeny_edge_selected_state" not in st.session_state:
         st.session_state["kemeny_edge_selected_state"] = []
-    if "kemeny_edge_selected_widget" not in st.session_state:
+
+    # If we need to sync the widget value, do it BEFORE widget creation
+    if st.session_state.pop("kemeny_edge_sync_selected", False):
         st.session_state["kemeny_edge_selected_widget"] = list(st.session_state["kemeny_edge_selected_state"])
 
     selected_widget = st.multiselect(
@@ -355,7 +357,7 @@ def page() -> None:
         key="kemeny_edge_selected_widget",
     )
 
-    # persist widget -> state
+    # Persist widget -> state (this is always allowed)
     st.session_state["kemeny_edge_selected_state"] = list(selected_widget)
     selected = list(selected_widget)
 
@@ -402,11 +404,11 @@ def page() -> None:
             # Update order
             st.session_state["kemeny_edge_order"] = [lbl for lbl in order if lbl != active]
 
-            # Update selection state (NOT the widget key)
+            # Update selected state (DO NOT touch the widget key here)
             st.session_state["kemeny_edge_selected_state"] = [lbl for lbl in selected if lbl != active]
 
-            # Also update widget value BEFORE rerun (allowed: next run re-instantiates)
-            st.session_state["kemeny_edge_selected_widget"] = list(st.session_state["kemeny_edge_selected_state"])
+            # Request sync on next run (before widget instantiation)
+            st.session_state["kemeny_edge_sync_selected"] = True
 
             new_order = st.session_state["kemeny_edge_order"]
             if new_order:
