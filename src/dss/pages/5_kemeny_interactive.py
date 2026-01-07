@@ -424,15 +424,16 @@ def page() -> None:
             st.warning("Kemeny constant is undefined for the selected removals.")
 
     with col_plot:
-        st.markdown("### Kemeny constant after each removal")
-        fig, ax = plt.subplots()
-        series = [base_k] + result.history
-        ax.plot(list(range(len(series))), series, marker="o")
-        ax.set_xlabel("Step")
-        ax.set_ylabel("Kemeny constant")
-        ax.grid()
-        ax.set_title("Kemeny constant versus removal steps")
-        st.pyplot(fig)
+        if order:
+                st.markdown("### Kemeny constant after each removal")
+                fig, ax = plt.subplots()
+                series = [base_k] + result.history
+                ax.plot(list(range(len(series))), series, marker="o")
+                ax.set_xlabel("Step")
+                ax.set_ylabel("Kemeny constant")
+                ax.grid()
+                ax.set_title("Kemeny constant versus removal steps")
+                st.pyplot(fig)
 
     # === BOTTOM: removal order table + reorder controls (1,1,3) ===
     st.markdown("### Removal order")
