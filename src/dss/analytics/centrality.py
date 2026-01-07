@@ -154,8 +154,9 @@ def borda_count(
     The final score is the average Borda score across enabled measures.
     """
     active_cols = [col for col, enabled in weight_inputs.items() if enabled]
+    # No measures selected: return zero scores
     if not active_cols:
-        raise ValueError("No centrality measures selected for Borda count.")
+        return pd.Series(0.0, index=df.index)
 
     ranks = df[active_cols].rank(ascending=False, method="average")
     n = len(df)
