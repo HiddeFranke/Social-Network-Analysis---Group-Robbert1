@@ -85,5 +85,70 @@ def page() -> None:
         st.dataframe(info_df)
 
 
+
+    st.markdown("""
+        ## Centrality Analysis – Quick User Guide
+        
+        This page helps you identify **important nodes in a network**.  
+        A network consists of **nodes** (circles) and **edges** (connections).
+        
+        “Importance” can mean different things. Therefore, multiple **centrality metrics** are used.
+        
+        ---
+        
+        ### Centrality metrics (what do they mean?)
+        
+        **Degree**  
+        How many direct connections does a node have?  
+        High score = very connected or popular.
+        
+        **Eigenvector**  
+        Are you connected to other important nodes?  
+        High score = influence through influential connections.
+        
+        **Katz**  
+        How far does your influence reach, directly and indirectly?  
+        High score = strong reach through the network.
+        
+        **Betweenness**  
+        How often do others need you to connect?  
+        High score = you act as a bridge between groups.
+        
+        **Closeness**  
+        How quickly can you reach everyone else?  
+        High score = centrally located in terms of distance.
+        
+        **PageRank**  
+        How much important attention flows to you?  
+        High score = prestige or authority in the network.
+        
+        ---
+        
+        ### Weighting scheme
+        
+        Use the sliders to decide **which metrics matter most**.  
+        Higher weight means more influence on the final score.
+        
+        ---
+        
+        ### Aggregation method
+        
+        **Weighted sum**  
+        Combines all metrics using your chosen weights.
+        
+        **Borda count**  
+        Ranks nodes per metric and combines the rankings.
+        
+        ---
+        
+        ### Network visualization
+        
+        Node size reflects the **combined centrality score**.  
+        Highlighted nodes show the **Top N** (or Bottom N) based on your settings.
+        
+        Tip: start with equal weights and adjust one slider at a time to see the effect.
+    """)
+
+
 if __name__ == "__main__":
     page()
