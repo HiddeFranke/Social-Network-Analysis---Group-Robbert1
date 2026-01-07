@@ -42,6 +42,7 @@ def page() -> None:
             weight_inputs[col] = st.sidebar.slider(f"Weight for {col}", 0.0, 1.0, 1.0, 0.1)
             combined = combine_centralities(df, weights=weight_inputs)
     else:
+        st.sidebar.header("Measure scheme")
         for col in df.columns:
             weight_inputs[col] = st.sidebar.toggle(label=str(col))
         combined = borda_count(df)
