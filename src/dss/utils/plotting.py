@@ -251,8 +251,8 @@ def plot_network(
             ax=ax,
             edge_color="red",
             style="dashed",
-            width=1,
-            alpha=0.06,
+            width=0.7,
+            alpha=0.5,
         )
     # Labels
     if show_labels:
