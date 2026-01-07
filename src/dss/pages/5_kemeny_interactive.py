@@ -277,8 +277,6 @@
 #========================================================================================
 
 
-
-
 # File: src/dss/pages/5_kemeny_interactive.py
 """Streamlit page: Kemeny constant analysis with interactive EDGE removal."""
 
@@ -355,7 +353,7 @@ def _remove_active_edge() -> None:
     st.session_state["kemeny_edge_order"] = new_order
     st.session_state["kemeny_edge_selected_state"] = new_selected
 
-    # Update multiselect value in callback (safe)
+    # Safe: update widget value in callback
     st.session_state["kemeny_edge_selected_widget"] = list(new_selected)
 
     if new_order:
@@ -374,14 +372,13 @@ def page() -> None:
         st.info("No graph loaded. Please upload a `.mtx` file on the Upload page.")
         return
 
-    # Section title (as requested)
     st.subheader("Remove edges and observe effect on Kemeny")
     recompute_on_largest = st.checkbox("Recompute on largest component if disconnected", value=True)
 
     label_to_edge = _build_label_to_edge(G)
     all_labels = list(label_to_edge.keys())
 
-    # Selected edges state (source of truth)
+    # Source of truth for selection
     if "kemeny_edge_selected_state" not in st.session_state:
         st.session_state["kemeny_edge_selected_state"] = []
     if "kemeny_edge_selected_widget" not in st.session_state:
@@ -398,16 +395,15 @@ def page() -> None:
     selected = list(selected_widget)
 
     order = _sync_order(selected, label_to_edge)
-
-    # Compute results (so we can lay out metrics + plots)
-    base_k = kemeny_constant(G)
     ordered_edges: List[Edge] = [label_to_edge[lbl] for lbl in st.session_state.get("kemeny_edge_order", [])]
+
+    base_k = kemeny_constant(G)
     result = interactive_kemeny_edges(G, ordered_edges, recompute_on_largest)
 
-    # Layout: left metrics, right plot+graph
-    left, right = st.columns([1, 2])
+    # === MAIN CONTENT ROW: constants | plot | graph ===
+    col_const, col_plot, col_graph = st.columns([1, 1, 1])
 
-    with left:
+    with col_const:
         st.markdown("### Kemeny constants")
         st.metric("Kemeny constant (baseline)", f"{base_k:.3f}")
         if result.kemeny == result.kemeny:
@@ -415,24 +411,7 @@ def page() -> None:
         else:
             st.warning("Kemeny constant is undefined for the selected removals.")
 
-        st.markdown("### Reorder removals")
-        if order:
-            if "kemeny_edge_active" not in st.session_state or st.session_state["kemeny_edge_active"] not in order:
-                st.session_state["kemeny_edge_active"] = order[0]
-
-            st.selectbox("Edge to reorder", options=order, key="kemeny_edge_active")
-
-            b1, b2 = st.columns(2)
-            with b1:
-                st.button("Up", use_container_width=True, on_click=_move_active, args=(-1,))
-            with b2:
-                st.button("Down", use_container_width=True, on_click=_move_active, args=(+1,))
-
-            st.button("Remove", use_container_width=True, on_click=_remove_active_edge)
-        else:
-            st.info("Select edges above to start building a removal order.")
-
-    with right:
+    with col_plot:
         st.markdown("### Kemeny constant after each removal")
         fig, ax = plt.subplots()
         series = [base_k] + result.history
@@ -443,6 +422,7 @@ def page() -> None:
         ax.set_title("Kemeny constant versus removal steps")
         st.pyplot(fig)
 
+    with col_graph:
         st.markdown("### Network view (after removing edges)")
         H = G.copy()
         for u, v in ordered_edges:
@@ -461,17 +441,37 @@ def page() -> None:
             removed_edges=ordered_edges,
         )
 
-    # Removal order at the end
+    # === BOTTOM: removal order table + reorder controls (1,1,3) ===
     st.markdown("### Removal order")
-    if order:
-        order_df = pd.DataFrame({"Step": list(range(1, len(order) + 1)), "Edge removed": order})
-        order_df = pd.concat(
-            [pd.DataFrame({"Step": [0], "Edge removed": ["Baseline (no removal)"]}), order_df],
-            ignore_index=True,
-        )
+
+    if not order:
+        st.info("Select edges above to start building a removal order.")
+        return
+
+    order_df = pd.DataFrame({"Step": list(range(1, len(order) + 1)), "Edge removed": order})
+    order_df = pd.concat(
+        [pd.DataFrame({"Step": [0], "Edge removed": ["Baseline (no removal)"]}), order_df],
+        ignore_index=True,
+    )
+
+    col_a, col_b, _ = st.columns([1, 1, 3])
+
+    with col_a:
         st.dataframe(order_df, use_container_width=True, hide_index=True)
-    else:
-        st.info("No removal order yet. Select edges above to begin.")
+
+    with col_b:
+        if "kemeny_edge_active" not in st.session_state or st.session_state["kemeny_edge_active"] not in order:
+            st.session_state["kemeny_edge_active"] = order[0]
+
+        st.selectbox("Edge to reorder", options=order, key="kemeny_edge_active")
+
+        b1, b2 = st.columns(2)
+        with b1:
+            st.button("Up", use_container_width=True, on_click=_move_active, args=(-1,))
+        with b2:
+            st.button("Down", use_container_width=True, on_click=_move_active, args=(+1,))
+
+        st.button("Remove", use_container_width=True, on_click=_remove_active_edge)
 
 
 if __name__ == "__main__":
