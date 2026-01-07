@@ -424,58 +424,42 @@ def page() -> None:
         st.pyplot(fig)
 
     with col_graph:
-        st.subheader("Network view (removed edges shown as dashed red)")
-
-        # Stable layout
-        pos = nx.spring_layout(G, seed=42)
-
-        removed_set = set(ordered_edges)
-        if not G.is_directed():
-            removed_set |= {(v, u) for (u, v) in removed_set}
-
-        remaining_edges = [(u, v) for (u, v) in G.edges() if (u, v) not in removed_set]
-
-        fig_net, ax_net = plt.subplots(figsize=(6, 6))
-
-        # Nodes
-        nx.draw_networkx_nodes(
-            G,
-            pos,
-            ax=ax_net,
-            node_size=500,
-            node_color="lightblue",
-            edgecolors="black",
-        )
-
-        # Normal edges
-        nx.draw_networkx_edges(
-            G,
-            pos,
-            edgelist=remaining_edges,
-            ax=ax_net,
-            width=1.5,
-            edge_color="gray",
-        )
-
-        # Removed edges
-        if ordered_edges:
-            nx.draw_networkx_edges(
-                G,
-                pos,
-                edgelist=ordered_edges,
-                ax=ax_net,
-                width=2.5,
-                edge_color="red",
-                style="dashed",
+            st.subheader("Network view (after removing edges)")
+        
+            # Draw normal graph (unchanged)
+            H = G.copy()
+            for u, v in ordered_edges:
+                if H.has_edge(u, v):
+                    H.remove_edge(u, v)
+                elif (not H.is_directed()) and H.has_edge(v, u):
+                    H.remove_edge(v, u)
+        
+            display_network(
+                H,
+                node_size=None,
+                node_color=None,
+                highlight=[],
+                title="Graph after edge removals",
+                show_labels=True,
             )
+        
+            # --- Overlay removed edges as dashed red ---
+            if ordered_edges:
+                pos = nx.spring_layout(G, seed=42)
+        
+                fig_overlay, ax_overlay = plt.subplots()
+                nx.draw_networkx_edges(
+                    G,
+                    pos,
+                    edgelist=ordered_edges,
+                    edge_color="red",
+                    style="dashed",
+                    width=2.5,
+                    ax=ax_overlay,
+                )
+                ax_overlay.axis("off")
+                st.pyplot(fig_overlay)
 
-        # Labels
-        nx.draw_networkx_labels(G, pos, ax=ax_net, font_size=10)
-
-        ax_net.set_title("Removed edges are shown as dashed red lines")
-        ax_net.axis("off")
-
-        st.pyplot(fig_net)
 
 
 if __name__ == "__main__":
