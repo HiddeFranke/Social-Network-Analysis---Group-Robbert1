@@ -265,7 +265,6 @@
 
 #========================================================================================
 
-
 # File: src/dss/pages/5_kemeny_interactive.py
 """Streamlit page: Kemeny constant analysis with interactive EDGE removal."""
 
@@ -279,7 +278,6 @@ import networkx as nx
 import pandas as pd
 
 from dss.ui.state import init_state, get_state
-from dss.ui.components import display_network
 from dss.analytics.kemeny import kemeny_constant, interactive_kemeny_edges, Edge
 
 
@@ -322,8 +320,6 @@ def _move(active: str, direction: int) -> None:
         return
     order[i], order[j] = order[j], order[i]
     st.session_state["kemeny_edge_order"] = order
-
-    # tell UI to keep the same active edge selected after rerun
     st.session_state["kemeny_edge_force_active"] = active
 
 
@@ -360,7 +356,6 @@ def page() -> None:
         st.info("Select edges above to start building a removal order.")
         return
 
-    # Step table: baseline 0 + steps 1..k
     order_df = pd.DataFrame({"Step": list(range(1, len(order) + 1)), "Edge removed": order})
     order_df = pd.concat(
         [pd.DataFrame({"Step": [0], "Edge removed": ["Baseline (no removal)"]}), order_df],
@@ -375,7 +370,6 @@ def page() -> None:
         widget_key = "kemeny_edge_active"
 
         forced = st.session_state.pop("kemeny_edge_force_active", None)
-
         if forced is not None and forced in order:
             st.session_state[widget_key] = forced
         else:
@@ -412,6 +406,7 @@ def page() -> None:
         st.warning("Kemeny constant is undefined for the selected removals.")
 
     col_plot, col_graph = st.columns([1, 1])
+
     with col_plot:
         st.subheader("Kemeny constant after each removal")
         fig, ax = plt.subplots()
@@ -425,6 +420,8 @@ def page() -> None:
 
     with col_graph:
         st.subheader("Network view (after removing edges)")
+
+        # Graph after removals (same as before)
         H = G.copy()
         for u, v in ordered_edges:
             if H.has_edge(u, v):
@@ -432,31 +429,35 @@ def page() -> None:
             elif (not H.is_directed()) and H.has_edge(v, u):
                 H.remove_edge(v, u)
 
-        # Keep your existing network rendering unchanged
-        display_network(
-            H,
-            node_size=None,
-            node_color=None,
-            highlight=[],
-            title="Graph after edge removals",
-            show_labels=True,
-        )
+        # Single figure: draw H + overlay removed edges in red dashed
+        pos = nx.spring_layout(G, seed=42)
 
-        # Overlay the removed edges as dashed red lines (extra visual cue)
+        fig_net, ax_net = plt.subplots(figsize=(7, 7))
+
+        # Draw nodes (keep everything visible)
+        nx.draw_networkx_nodes(G, pos, ax=ax_net)
+        nx.draw_networkx_labels(G, pos, ax=ax_net, font_size=9)
+
+        # Draw remaining edges (from H)
+        nx.draw_networkx_edges(H, pos, ax=ax_net)
+
+        # Overlay removed edges (from G) as dashed red
         if ordered_edges:
-            pos = nx.spring_layout(G, seed=42)
-            fig_overlay, ax_overlay = plt.subplots()
+            dashed_edges = ordered_edges
             nx.draw_networkx_edges(
                 G,
                 pos,
-                edgelist=ordered_edges,
+                edgelist=dashed_edges,
+                ax=ax_net,
                 edge_color="red",
                 style="dashed",
                 width=2.5,
-                ax=ax_overlay,
             )
-            ax_overlay.axis("off")
-            st.pyplot(fig_overlay)
+
+        ax_net.set_title("Graph after edge removals")
+        ax_net.axis("off")
+
+        st.pyplot(fig_net)
 
 
 if __name__ == "__main__":
