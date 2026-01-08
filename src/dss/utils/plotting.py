@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
 
+
 # def plot_network(
 #     G: nx.Graph,
 #     pos: Dict[Any, np.ndarray],
@@ -22,6 +23,7 @@ import numpy as np
 #     title: Optional[str] = None,
 #     show_labels: bool = True,
 #     label_dict: Optional[Dict[Any, str]] = None,
+#     removed_edges: Optional[Iterable[Tuple[Any, Any]]] = None,
 # ) -> plt.Figure:
 #     """Render a network plot using a fixed layout with optional labels.
 
@@ -32,37 +34,39 @@ import numpy as np
 #     pos: dict
 #         Precomputed layout positions for each node.
 #     node_size: dict, optional
-#         A mapping from node to size.  If provided, node sizes are
+#         A mapping from node to size. If provided, node sizes are
 #         scaled relative to the maximum value in the mapping.
 #     node_color: dict, optional
-#         A mapping from node to a numeric colour value.  If provided,
-#         colours are mapped through the given colormap.
+#         A mapping from node to a numeric color value. If provided,
+#         colors are mapped through the given colormap.
 #     cmap: str, optional
 #         Name of a Matplotlib colormap to use when mapping numeric values
-#         to colours; defaults to ``"viridis"``.
+#         to colors; defaults to ``"viridis"``.
 #     highlight_nodes: iterable, optional
 #         A collection of nodes to draw with a distinct border.
 #     title: str, optional
 #         Title for the plot.
 #     show_labels: bool, optional
 #         If True, draw node labels (usually the node identifiers) on the
-#         graph.  Font sizes will be scaled with node size to keep
+#         graph. Font sizes will be scaled with node size to keep
 #         proportions.
 #     label_dict: dict, optional
-#         An optional mapping of nodes to label strings.  If None,
+#         An optional mapping of nodes to label strings. If None,
 #         ``str(node)`` is used for each node.
+#     removed_edges: iterable of (u, v), optional
+#         Edges to overlay as visually "removed" (drawn as dashed red lines).
+#         Useful when you want to keep the overall structure visible while
+#         clearly indicating which connections were removed.
 
 #     Returns
 #     -------
 #     matplotlib.figure.Figure
 #         The figure containing the plot.
 #     """
-
-#     # Create a square figure for consistent aspect ratio
 #     fig, ax = plt.subplots(figsize=(6, 6))
 #     ax.set_axis_off()
-#     # Prepare node sizes.  Use the raw values to compute scaling and
-#     # later derive font sizes.  If not provided, default to uniform size.
+
+#     # Prepare node sizes
 #     if node_size is not None:
 #         sizes_raw = np.array([node_size.get(n, 1.0) for n in G.nodes()], dtype=float)
 #         if sizes_raw.max() > 0:
@@ -72,8 +76,7 @@ import numpy as np
 #     else:
 #         sizes_raw = np.ones(G.number_of_nodes(), dtype=float)
 #         sizes = np.full(G.number_of_nodes(), 100.0)
-#     # Prepare node colours.  Normalize values to a colour scale.  If
-#     # uniform or unspecified, assign a constant zero value to each node.
+#     # Prepare node colors
 #     if node_color is not None:
 #         values = np.array([node_color.get(n, 0.0) for n in G.nodes()], dtype=float)
 #         vmin, vmax = values.min(), values.max()
@@ -83,7 +86,7 @@ import numpy as np
 #     else:
 #         colours = np.zeros(G.number_of_nodes())
 #         vmin, vmax = 0.0, 1.0
-#     # Draw nodes with sizes and colours
+#     # Draw nodes
 #     nx.draw_networkx_nodes(
 #         G,
 #         pos,
@@ -94,7 +97,7 @@ import numpy as np
 #         vmax=vmax,
 #         ax=ax,
 #     )
-#     # Highlight specified nodes by re‑drawing them with a red border
+#     # Highlight nodes
 #     if highlight_nodes:
 #         nodelist = list(highlight_nodes)
 #         highlight_sizes = [sizes[list(G.nodes()).index(n)] for n in nodelist]
@@ -112,25 +115,49 @@ import numpy as np
 #             linewidths=2,
 #             ax=ax,
 #         )
-#     # Draw edges with light transparency
+#     # Draw edges (base)
 #     nx.draw_networkx_edges(G, pos, alpha=0.5, ax=ax)
-#     # Draw labels if requested.  Font sizes are scaled between 6 and 12
-#     # based on the relative node size.  If a custom ``label_dict`` is
-#     # provided, its values are used; otherwise use the node identifier.
+#     # Overlay removed edges as dashed red (drawn on top)
+#     if removed_edges:
+#         dashed: List[Tuple[Any, Any]] = list(removed_edges)
+#         if not G.is_directed():
+#             s = set(dashed)
+#             s |= {(v, u) for (u, v) in s}
+#             dashed = list(s)
+#         nx.draw_networkx_edges(
+#             G,
+#             pos,
+#             edgelist=dashed,
+#             ax=ax,
+#             edge_color="red",
+#             # style="dashed",
+#             width=0.8,
+#             alpha=1,
+#             style=(0, (2, 6)),
+#         )
+
+#     # Labels
 #     if show_labels:
 #         max_raw = sizes_raw.max() if sizes_raw.max() > 0 else 1.0
 #         for idx, n in enumerate(G.nodes()):
 #             x, y = pos[n]
-#             # Scale font size: base of 6 plus up to 6 additional points
-#             # fs = 6 + 6 * (sizes_raw[idx] / max_raw)
 #             fs = 4 + 3 * (sizes_raw[idx] / max_raw)
 #             label = label_dict[n] if (label_dict is not None and n in label_dict) else str(n)
-#             ax.text(x, y, label, fontsize=fs, ha='center', va='center', color='white') #,bbox=dict(facecolor="white", alpha=0.6, edgecolor="none", pad=0.5)) #color='black')
-#     # Set title if provided
+#             ax.text(x, y, label, fontsize=fs, ha="center", va="center", color="white")
 #     if title:
 #         ax.set_title(title)
 #     return fig
-# --- plot_network (UPDATED) ---
+
+
+
+
+
+def _edge_length(u: Any, v: Any, pos: Dict[Any, np.ndarray]) -> float:
+    """Euclidean length of an edge in layout coordinates."""
+    x1, y1 = pos[u]
+    x2, y2 = pos[v]
+    return float(((x1 - x2) ** 2 + (y1 - y2) ** 2) ** 0.5)
+
 
 def plot_network(
     G: nx.Graph,
@@ -175,8 +202,7 @@ def plot_network(
         ``str(node)`` is used for each node.
     removed_edges: iterable of (u, v), optional
         Edges to overlay as visually "removed" (drawn as dashed red lines).
-        Useful when you want to keep the overall structure visible while
-        clearly indicating which connections were removed.
+        The dash pattern scales with the edge length in layout coordinates.
 
     Returns
     -------
@@ -186,26 +212,30 @@ def plot_network(
     fig, ax = plt.subplots(figsize=(6, 6))
     ax.set_axis_off()
 
+    nodes_list = list(G.nodes())
+
     # Prepare node sizes
     if node_size is not None:
-        sizes_raw = np.array([node_size.get(n, 1.0) for n in G.nodes()], dtype=float)
+        sizes_raw = np.array([node_size.get(n, 1.0) for n in nodes_list], dtype=float)
         if sizes_raw.max() > 0:
             sizes = 300.0 * (sizes_raw / sizes_raw.max())
         else:
             sizes = np.full_like(sizes_raw, 100.0)
     else:
-        sizes_raw = np.ones(G.number_of_nodes(), dtype=float)
-        sizes = np.full(G.number_of_nodes(), 100.0)
+        sizes_raw = np.ones(len(nodes_list), dtype=float)
+        sizes = np.full(len(nodes_list), 100.0)
+
     # Prepare node colors
     if node_color is not None:
-        values = np.array([node_color.get(n, 0.0) for n in G.nodes()], dtype=float)
-        vmin, vmax = values.min(), values.max()
+        values = np.array([node_color.get(n, 0.0) for n in nodes_list], dtype=float)
+        vmin, vmax = float(values.min()), float(values.max())
         if vmin == vmax:
             vmin, vmax = 0.0, 1.0
         colours = values
     else:
-        colours = np.zeros(G.number_of_nodes())
+        colours = np.zeros(len(nodes_list), dtype=float)
         vmin, vmax = 0.0, 1.0
+
     # Draw nodes
     nx.draw_networkx_nodes(
         G,
@@ -217,55 +247,72 @@ def plot_network(
         vmax=vmax,
         ax=ax,
     )
+
     # Highlight nodes
     if highlight_nodes:
         nodelist = list(highlight_nodes)
-        highlight_sizes = [sizes[list(G.nodes()).index(n)] for n in nodelist]
-        highlight_colours = [colours[list(G.nodes()).index(n)] for n in nodelist]
-        nx.draw_networkx_nodes(
-            G,
-            pos,
-            nodelist=nodelist,
-            node_size=highlight_sizes,
-            node_color=highlight_colours,
-            cmap=cmap,
-            vmin=vmin,
-            vmax=vmax,
-            edgecolors="red",
-            linewidths=2,
-            ax=ax,
-        )
+        idx_map = {n: i for i, n in enumerate(nodes_list)}
+        highlight_sizes = [sizes[idx_map[n]] for n in nodelist if n in idx_map]
+        highlight_colours = [colours[idx_map[n]] for n in nodelist if n in idx_map]
+        nodelist = [n for n in nodelist if n in idx_map]
+
+        if nodelist:
+            nx.draw_networkx_nodes(
+                G,
+                pos,
+                nodelist=nodelist,
+                node_size=highlight_sizes,
+                node_color=highlight_colours,
+                cmap=cmap,
+                vmin=vmin,
+                vmax=vmax,
+                edgecolors="red",
+                linewidths=2,
+                ax=ax,
+            )
+
     # Draw edges (base)
     nx.draw_networkx_edges(G, pos, alpha=0.5, ax=ax)
-    # Overlay removed edges as dashed red (drawn on top)
+
+    # Overlay removed edges with length-dependent dash spacing
     if removed_edges:
-        dashed: List[Tuple[Any, Any]] = list(removed_edges)
-        if not G.is_directed():
-            s = set(dashed)
-            s |= {(v, u) for (u, v) in s}
-            dashed = list(s)
-        nx.draw_networkx_edges(
-            G,
-            pos,
-            edgelist=dashed,
-            ax=ax,
-            edge_color="red",
-            # style="dashed",
-            width=0.8,
-            alpha=1,
-            style=(0, (2, 6)),
-        )
+        for u, v in removed_edges:
+            if u not in pos or v not in pos:
+                continue
+
+            # Only draw if the connection exists in either direction (useful for undirected + safety)
+            if not G.has_edge(u, v) and not G.has_edge(v, u):
+                continue
+
+            L = _edge_length(u, v, pos)
+
+            # Dash pattern scales with edge length (tune these multipliers if needed)
+            dash_on = max(1.0, 0.08 * L)
+            dash_off = max(3.0, 0.25 * L)
+
+            nx.draw_networkx_edges(
+                G,
+                pos,
+                edgelist=[(u, v)],
+                ax=ax,
+                edge_color="red",
+                width=0.8,
+                alpha=1.0,
+                style=(0, (dash_on, dash_off)),
+            )
 
     # Labels
     if show_labels:
-        max_raw = sizes_raw.max() if sizes_raw.max() > 0 else 1.0
-        for idx, n in enumerate(G.nodes()):
+        max_raw = float(sizes_raw.max()) if float(sizes_raw.max()) > 0 else 1.0
+        for idx, n in enumerate(nodes_list):
             x, y = pos[n]
             fs = 4 + 3 * (sizes_raw[idx] / max_raw)
             label = label_dict[n] if (label_dict is not None and n in label_dict) else str(n)
-            ax.text(x, y, label, fontsize=fs, ha="center", va="center", color="white")
+            ax.text(x, y, label, fontsize=float(fs), ha="center", va="center", color="white")
+
     if title:
         ax.set_title(title)
+
     return fig
 
 
