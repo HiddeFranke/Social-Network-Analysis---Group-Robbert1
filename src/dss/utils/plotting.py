@@ -250,7 +250,7 @@ def plot_network(
             edgelist=dashed,
             ax=ax,
             edge_color="red",
-            style="dashed",
+            # style="dashed",
             width=0.8,
             alpha=1,
             style=(0, (2, 6)),
