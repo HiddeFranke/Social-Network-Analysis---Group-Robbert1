@@ -1,15 +1,15 @@
-"""Graph plotting utilities.
+# """Graph plotting utilities.
 
-This module centralises the creation of network plots.  It uses
-Matplotlib and NetworkX to draw graphs with configurable node sizes
-and colours.  Because Streamlit caches Matplotlib figures, the layout
-coordinates can be reused across multiple plots for consistency.
-"""
+# This module centralises the creation of network plots.  It uses
+# Matplotlib and NetworkX to draw graphs with configurable node sizes
+# and colours.  Because Streamlit caches Matplotlib figures, the layout
+# coordinates can be reused across multiple plots for consistency.
+# """
 
-from typing import Any, Dict, Iterable, Optional, Tuple, List
-import matplotlib.pyplot as plt
-import networkx as nx
-import numpy as np
+# from typing import Any, Dict, Iterable, Optional, Tuple, List
+# import matplotlib.pyplot as plt
+# import networkx as nx
+# import numpy as np
 
 
 # def plot_network(
@@ -152,6 +152,41 @@ import numpy as np
 
 
 
+
+# if __name__ == "__main__":
+#     # Simple demonstration
+#     import networkx as nx
+#     G = nx.cycle_graph(5)
+#     pos = nx.spring_layout(G, seed=42)
+#     fig = plot_network(G, pos, title="Cycle graph")
+#     fig.savefig("_demo_plot.png")
+#     print("Demo plot saved to _demo_plot.png")
+
+
+
+
+
+
+
+
+
+
+
+
+"""Graph plotting utilities.
+
+This module centralises the creation of network plots. It uses
+Matplotlib and NetworkX to draw graphs with configurable node sizes
+and colours. Because Streamlit caches Matplotlib figures, the layout
+coordinates can be reused across multiple plots for consistency.
+"""
+
+from typing import Any, Dict, Iterable, Optional, Tuple
+import matplotlib.pyplot as plt
+import networkx as nx
+import numpy as np
+
+
 def _edge_length(u: Any, v: Any, pos: Dict[Any, np.ndarray]) -> float:
     """Euclidean length of an edge in layout coordinates."""
     x1, y1 = pos[u]
@@ -202,7 +237,8 @@ def plot_network(
         ``str(node)`` is used for each node.
     removed_edges: iterable of (u, v), optional
         Edges to overlay as visually "removed" (drawn as dashed red lines).
-        The dash pattern scales with the edge length in layout coordinates.
+        Dash spacing scales with the edge length in layout coordinates.
+        Removed edges are drawn even if they are not present in G.
 
     Returns
     -------
@@ -217,8 +253,8 @@ def plot_network(
     # Prepare node sizes
     if node_size is not None:
         sizes_raw = np.array([node_size.get(n, 1.0) for n in nodes_list], dtype=float)
-        if sizes_raw.max() > 0:
-            sizes = 300.0 * (sizes_raw / sizes_raw.max())
+        if float(sizes_raw.max()) > 0:
+            sizes = 300.0 * (sizes_raw / float(sizes_raw.max()))
         else:
             sizes = np.full_like(sizes_raw, 100.0)
     else:
@@ -250,13 +286,11 @@ def plot_network(
 
     # Highlight nodes
     if highlight_nodes:
-        nodelist = list(highlight_nodes)
         idx_map = {n: i for i, n in enumerate(nodes_list)}
-        highlight_sizes = [sizes[idx_map[n]] for n in nodelist if n in idx_map]
-        highlight_colours = [colours[idx_map[n]] for n in nodelist if n in idx_map]
-        nodelist = [n for n in nodelist if n in idx_map]
-
+        nodelist = [n for n in highlight_nodes if n in idx_map]
         if nodelist:
+            highlight_sizes = [sizes[idx_map[n]] for n in nodelist]
+            highlight_colours = [colours[idx_map[n]] for n in nodelist]
             nx.draw_networkx_nodes(
                 G,
                 pos,
@@ -274,39 +308,49 @@ def plot_network(
     # Draw edges (base)
     nx.draw_networkx_edges(G, pos, alpha=0.5, ax=ax)
 
-    # Overlay removed edges with length-dependent dash spacing
+    # Overlay removed edges (always draw, even if removed from G)
     if removed_edges:
+        seen = set()
+        is_directed = G.is_directed()
+
         for u, v in removed_edges:
             if u not in pos or v not in pos:
                 continue
 
-            # Only draw if the connection exists in either direction (useful for undirected + safety)
-            if not G.has_edge(u, v) and not G.has_edge(v, u):
+            key = (u, v) if is_directed else tuple(sorted((u, v)))
+            if key in seen:
                 continue
+            seen.add(key)
 
             L = _edge_length(u, v, pos)
 
-            # Dash pattern scales with edge length (tune these multipliers if needed)
-            dash_on = max(1.0, 0.08 * L)
-            dash_off = max(3.0, 0.25 * L)
+            # Length-dependent dash pattern (tune multipliers if desired)
+            dash_on = max(1.5, 0.10 * L)
+            dash_off = max(4.0, 0.35 * L)
 
-            nx.draw_networkx_edges(
+            lc = nx.draw_networkx_edges(
                 G,
                 pos,
                 edgelist=[(u, v)],
                 ax=ax,
                 edge_color="red",
-                width=0.8,
+                width=2.2,  # thicker so it stays visible
                 alpha=1.0,
                 style=(0, (dash_on, dash_off)),
             )
+
+            # Ensure these are on top of the base edges
+            try:
+                lc.set_zorder(5)
+            except Exception:
+                pass
 
     # Labels
     if show_labels:
         max_raw = float(sizes_raw.max()) if float(sizes_raw.max()) > 0 else 1.0
         for idx, n in enumerate(nodes_list):
             x, y = pos[n]
-            fs = 4 + 3 * (sizes_raw[idx] / max_raw)
+            fs = 4 + 3 * (float(sizes_raw[idx]) / max_raw)
             label = label_dict[n] if (label_dict is not None and n in label_dict) else str(n)
             ax.text(x, y, label, fontsize=float(fs), ha="center", va="center", color="white")
 
@@ -316,12 +360,11 @@ def plot_network(
     return fig
 
 
-
 if __name__ == "__main__":
     # Simple demonstration
-    import networkx as nx
-    G = nx.cycle_graph(5)
-    pos = nx.spring_layout(G, seed=42)
-    fig = plot_network(G, pos, title="Cycle graph")
-    fig.savefig("_demo_plot.png")
+    G_demo = nx.cycle_graph(8)
+    pos_demo = nx.spring_layout(G_demo, seed=42)
+    removed_demo = [(0, 1), (3, 4), (6, 7)]
+    fig_demo = plot_network(G_demo, pos_demo, title="Cycle graph", removed_edges=removed_demo)
+    fig_demo.savefig("_demo_plot.png")
     print("Demo plot saved to _demo_plot.png")
