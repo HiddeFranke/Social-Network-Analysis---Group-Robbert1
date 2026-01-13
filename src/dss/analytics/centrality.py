@@ -18,7 +18,8 @@ from ..logging_config import get_logger
 logger = get_logger(__name__)
 
 
-def _safe_katz_centrality(G: nx.Graph, alpha: Optional[float] = None, beta: float = 1.0) -> Dict[Any, float]:
+# def _safe_katz_centrality(G: nx.Graph, alpha: Optional[float] = None, beta: float = 1.0) -> Dict[Any, float]:
+def _safe_katz_centrality(G: nx.Graph, alpha: Optional[float] = None, beta: float = 0.9) -> Dict[Any, float]:
     """Compute Katz centrality with a safe alpha.
 
     If `alpha` is None, estimate a stable value based on the largest
