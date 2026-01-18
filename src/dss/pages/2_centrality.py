@@ -49,7 +49,6 @@ def page() -> None:
         **PageRank**  
         How much important attention flows to you?  
         High score = prestige or authority in the network.
-        
         """)
     with col_right:
         st.markdown("""
@@ -58,16 +57,14 @@ def page() -> None:
         
         Use the sliders to decide **which metrics matter most**.  
         Higher weight means more influence on the final score.
-
         
         ### Aggregation method
         
         **Weighted sum**  
         Combines all metrics using your chosen weights.
+        
         **Borda count**  
         Ranks nodes per metric and combines the rankings.
-
-        
         """)
 
 
