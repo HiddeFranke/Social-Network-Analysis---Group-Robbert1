@@ -32,7 +32,7 @@ class Defaults:
     layout: str = "spring"
 
     # Random seed for reproducibility
-    seed: int = 42
+    seed: int = 55
 
 
 DEFAULTS = Defaults()
