@@ -18,6 +18,7 @@ def plot_network(
     *,
     node_size: Optional[Dict[Any, float]] = None,
     node_color: Optional[Dict[Any, float]] = None,
+    edge_color: Optional[Dict[Tuple[Any, Any], float]] = None,
     cmap: str = "viridis",
     highlight_nodes: Optional[Iterable[Any]] = None,
     title: Optional[str] = None,
@@ -39,6 +40,8 @@ def plot_network(
     node_color: dict, optional
         A mapping from node to a numeric color value. If provided,
         colors are mapped through the given colormap.
+    edge_color: dict, optional
+        Mapping from edge (u, v) to numeric color value (e.g. delta Kemeny).
     cmap: str, optional
         Name of a Matplotlib colormap to use when mapping numeric values
         to colors; defaults to ``"viridis"``.
@@ -86,6 +89,28 @@ def plot_network(
     else:
         colours = np.zeros(G.number_of_nodes())
         vmin, vmax = 0.0, 1.0
+    # Prepare edge colors (optional heatmap)
+    edges = list(G.edges())
+    edge_values = None
+    edge_vmin = edge_vmax = None
+
+    if edge_color is not None:
+        edge_values = []
+        for u, v in edges:
+            if (u, v) in edge_color:
+                edge_values.append(edge_color[(u, v)])
+            elif not G.is_directed() and (v, u) in edge_color:
+                edge_values.append(edge_color[(v, u)])
+            else:
+                edge_values.append(0.0)
+
+        edge_values = np.array(edge_values, dtype=float)
+
+        max_abs = np.max(np.abs(edge_values))
+        if max_abs > 0:
+            edge_vmin, edge_vmax = -max_abs, max_abs
+        else:
+            edge_vmin, edge_vmax = -1.0, 1.0
     # Draw nodes
     nx.draw_networkx_nodes(
         G,
@@ -115,8 +140,27 @@ def plot_network(
             linewidths=2,
             ax=ax,
         )
-    # Draw edges (base)
-    nx.draw_networkx_edges(G, pos, alpha=0.5, ax=ax)
+    if edge_values is not None:
+        nx.draw_networkx_edges(
+            G,
+            pos,
+            edgelist=edges,
+            edge_color=edge_values,
+            edge_cmap=plt.cm.coolwarm,
+            edge_vmin=edge_vmin,
+            edge_vmax=edge_vmax,
+            width=2.5,
+            alpha=0.9,
+            ax=ax,
+        )
+        sm = plt.cm.ScalarMappable(
+        cmap=plt.cm.coolwarm,
+        norm=plt.Normalize(vmin=edge_vmin, vmax=edge_vmax),
+        )
+        sm.set_array([])
+        plt.colorbar(sm, ax=ax, fraction=0.046, pad=0.04, label="Δ Kemeny if edge removed")
+    else:
+        nx.draw_networkx_edges(G, pos, alpha=0.5, ax=ax)
     # Overlay removed edges as dashed red (drawn on top)
     if removed_edges:
         dashed: List[Tuple[Any, Any]] = list(removed_edges)
@@ -131,7 +175,7 @@ def plot_network(
             ax=ax,
             edge_color="red",
             # style="dashed",
-            width=0.8,
+            width=1.4,
             alpha=1,
             style=(0, (2, 6)),
         )

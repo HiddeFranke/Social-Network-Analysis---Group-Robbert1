@@ -167,6 +167,32 @@ def page() -> None:
         st.info("No graph loaded. Please upload a `.mtx` file on the Upload page.")
         return
 
+    col_left, col_right = st.columns([2, 3])
+
+    with col_left:
+        st.markdown("### How does this page work?")
+        st.markdown(
+            """
+            This page analyzes the Kemeny constant of the graph, which measures the expected mixing time of a random walk.
+            When we remove an edge in between two nodes, the Kemeny constant changes.
+            Depending on the change, we find that the respective connection was deemed as important to the graph.
+            Specifically:
+
+            - The (steep) decrease of Kemeny applies that a bottleneck of the system has been removed and the average information traversal time has decreased.
+            - The (steep) increase of Kemeny applies an important connection has been removed and the average information traversal time has increased.
+            """
+        )
+    with col_right:
+        display_network(
+            G,
+            node_size=None,
+            node_color=None,
+            highlight=[],
+            title="Original graph",
+            show_labels=True,
+            removed_edges=None,
+        )
+
     st.subheader("Remove edges and observe effect on Kemeny")
     recompute_on_largest = st.checkbox("Recompute on largest component if disconnected", value=True)
 
@@ -202,6 +228,34 @@ def page() -> None:
     kemeny_defined = after_k == after_k  # not NaN
     delta = (after_k - base_k) if kemeny_defined else None
 
+    st.markdown("## Edge impact on Kemeny constant")
+    st.markdown("Edges are colored by how much the Kemeny constant would change if removed.")
+
+    G_heat = G.copy()
+
+    for u, v in ordered_edges:
+        if G_heat.has_edge(u, v):
+            G_heat.remove_edge(u, v)
+        elif not G_heat.is_directed() and G_heat.has_edge(v, u):
+            G_heat.remove_edge(v, u)
+    
+    current_heat_k = kemeny_constant(G_heat)
+
+    edge_impacts = {}
+    for e in G_heat.edges():
+        result_heat = interactive_kemeny_edges(G_heat, [e], recompute_on_largest)
+        if result_heat.kemeny == result_heat.kemeny:
+            edge_impacts[e] = result_heat.kemeny - current_heat_k
+        else:
+            edge_impacts[e] = None
+
+    display_network(
+        G_heat,
+        edge_color = edge_impacts,
+        title = "Edge sensitivity heatmap (Change in Kemeny if removed)",
+        show_labels = True,
+    )
+
     # === MAIN CONTENT ROW: constants | plot ===
     col_const, _, col_plot = st.columns([1, 1, 3])
 
@@ -223,6 +277,7 @@ def page() -> None:
     with col_plot:
         if order:
                 st.markdown("### Kemeny constant after each removal")
+                st.markdown("The order of the removal of certain edges has an impact on the subsequent Kemeny values that the remaining edges contain. A certain edge can have a bigger impact on the information network if similar edges have already been removed. As such, the following graph shows the inpact of each edge removal per step.")
                 fig, ax = plt.subplots()
                 series = [base_k] + result.history
                 ax.plot(list(range(len(series))), series, marker="o")
