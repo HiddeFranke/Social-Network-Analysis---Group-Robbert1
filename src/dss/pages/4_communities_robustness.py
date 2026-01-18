@@ -12,8 +12,69 @@ from dss.analytics.roles import compute_roles
 
 
 def page() -> None:
-    st.set_page_config(page_title="Communities & Robustness", layout="wide")
-    st.title("Community Detection and Robustness")
+    st.set_page_config(page_title="Community Clustering", layout="wide")
+    st.title("Community Clustering")
+    
+    ## AANPASSING
+    st.markdown("""
+        ## Community Clustering – Quick User Guide
+
+        ### Clustering Guide
+        """)
+        
+    col_left, col_right = st.columns([3, 2])
+
+    with col_left:
+        st.markdown("""
+        ### Community Summary
+        
+        **Modularity Q Score**  
+        A measure of how well a network is partitioned into communities. 
+        Value close to 1: indicates strong community structure.
+        Value close to 0: indicates weak community structure.
+        
+        **Within Ratio**  
+        A measure of how internally connected the communities are, as oposed to connections outside of the community.
+        High within ratio: Community mostly communicates within the community.
+        Low within ratio: Community interacts heavily with other communities.
+        
+        ### Clustering Methods
+        
+        **Girvan-Newman**  
+        Detects communities by repeatedly removing edges with high betweenness centrality, which act as bridges between groups. 
+        As these bridging edges are removed, the network splits into increasingly well-defined communities. 
+        The amount of communities to be distinct can be adjusted.
+        
+        **Spectral**  
+        Identifies communities by using the eigenvectors of the graph Laplacian to partition the network into weakly connected groups. 
+        It is based on minimizing a graph-cut objective and is effective at revealing global structure in the network. 
+        The amount of communities to be distinct can be adjusted.
+        
+        **Louvain**  
+        Detects communities by iteratively grouping nodes to maximize the modularity Q score. 
+        It is well suited for large networks and produces a hierarchical community structure.
+        Because the Louvain method maximizes modularity it can not be used to set a number for the amount of communities you want to distinct. 
+        Therefore it may make a distinction between more than two communities.
+        """)
+    with col_right:
+        st.markdown("""
+        
+        ### Robustness Analysis
+        
+        Robustness analysis evaluates how stable the results of a network analysis are when the network is slightly altered or when different methods are applied. 
+        A robust result indicates that the identified structure reflects meaningful patterns rather than noise or modeling choices.
+        
+        **Perturbation Test**  
+        Assesses robustness by deliberately introducing small changes to the network, in this case removing some of the edges, and re-running the analysis. 
+        If the results remain largely unchanged, the detected structure is considered robust.
+        
+        **Adjusted Rand Index (ARI)**  
+        Measures the similarity between two clusterings while correcting for simularities that could occur by chance. 
+        In this context, it is used to quantify how consistently communities are identified under network perturbations. 
+        ARI close to 1 = Robust method of community clustering.
+        ARI close to 0 = Community completely changes when perturbation test is applied
+        """)
+        
     init_state()
     G = get_state("graph")
     if G is None:
@@ -21,16 +82,34 @@ def page() -> None:
         return
     # Sidebar: choose method and parameters
     st.sidebar.header("Community detection parameters")
-    method = st.sidebar.selectbox("Method", ["louvain", "girvan_newman", "spectral"], index=0)
+
+    ## AANPASSING
+    # method = st.sidebar.selectbox("Method", ["louvain", "girvan_newman", "spectral"], index=0)
+    # Louvain als laatste methode
+    method = st.sidebar.selectbox("Method", ["spectral", "girvan_newman", "louvain"], index=0)
+    
     if method in {"girvan_newman", "spectral"}:
         k = st.sidebar.slider("Number of clusters (k)", 2, max(2, int(G.number_of_nodes() / 2)), 2)
     else:
         k = None
     # Compute communities
-    if get_state("community_results").get(method) is None:
+
+    ## AANPASSING
+#    if get_state("community_results").get(method) is None:
+#        comm_result = compute_communities(G, method=method, k=k)
+#        get_state("community_results")[method] = comm_result
+#    comm_result = get_state("community_results")[method]
+
+    # Use (method, k) as cache key
+    cache_key = (method, k)
+
+    # Compute communities
+    if get_state("community_results").get(cache_key) is None:
         comm_result = compute_communities(G, method=method, k=k)
-        get_state("community_results")[method] = comm_result
-    comm_result = get_state("community_results")[method]
+        get_state("community_results")[cache_key] = comm_result
+
+    comm_result = get_state("community_results")[cache_key]
+    
     # Display summary
     st.subheader("Community summary")
     st.write(f"Modularity Q: {comm_result.modularity:.3f}")
@@ -77,25 +156,27 @@ def page() -> None:
         st.write(f"Average modularity drop: {sum(robustness_result.modularity_drops) / len(robustness_result.modularity_drops):.3f}")
         display_histogram(robustness_result.ari_scores, title="ARI distribution", xlabel="ARI")
         display_boxplot(robustness_result.modularity_drops, title="Modularity drop distribution", ylabel="ΔQ")
-    # Compare to roles
-    st.subheader("Comparison with role clustering")
-    # Compute role result if not already
-    if get_state("role_result") is None:
-        from dss.analytics.centrality import compute_centralities
-        centrality_table = compute_centralities(G)
-        role_result = compute_roles(G, centrality_table=centrality_table)
-        set_state("role_result", role_result)
-    role_result = get_state("role_result")
-    role_labels_list = [role_result.labels[node] for node in G.nodes()]
-    comm_labels_list = [comm_result.labels[node] for node in G.nodes()]
-    ari = adjusted_rand_score(role_labels_list, comm_labels_list)
-    nmi = normalized_mutual_info_score(role_labels_list, comm_labels_list)
-    st.write(f"Adjusted Rand Index between roles and communities: {ari:.3f}")
-    st.write(f"Normalized Mutual Information: {nmi:.3f}")
     
-    import pandas as pd  # imported here to avoid top-level import issues
-    confusion = pd.crosstab(pd.Series(role_labels_list, name="role"), pd.Series(comm_labels_list, name="community"))
-    st.dataframe(confusion)
+    ## AANPASSING: Roles zijn geen zinvolle vergelijking met community
+    # Compare to roles
+    #st.subheader("Comparison with role clustering")
+    # Compute role result if not already
+    #if get_state("role_result") is None:
+   #     from dss.analytics.centrality import compute_centralities
+   #     centrality_table = compute_centralities(G)
+   #     role_result = compute_roles(G, centrality_table=centrality_table)
+   #     set_state("role_result", role_result)
+   # role_result = get_state("role_result")
+  #  role_labels_list = [role_result.labels[node] for node in G.nodes()]
+   # comm_labels_list = [comm_result.labels[node] for node in G.nodes()]
+  #  ari = adjusted_rand_score(role_labels_list, comm_labels_list)
+  #  nmi = normalized_mutual_info_score(role_labels_list, comm_labels_list)
+  #  st.write(f"Adjusted Rand Index between roles and communities: {ari:.3f}")
+  #  st.write(f"Normalized Mutual Information: {nmi:.3f}")
+    
+  #  import pandas as pd  # imported here to avoid top-level import issues
+  #  confusion = pd.crosstab(pd.Series(role_labels_list, name="role"), pd.Series(comm_labels_list, name="community"))
+  #  st.dataframe(confusion)
 
 
 if __name__ == "__main__":
