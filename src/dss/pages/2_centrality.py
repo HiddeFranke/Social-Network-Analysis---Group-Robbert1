@@ -50,6 +50,7 @@ def page() -> None:
         How much important attention flows to you?  
         High score = prestige or authority in the network.
         
+        ---
         
         """)
     with col_right:
