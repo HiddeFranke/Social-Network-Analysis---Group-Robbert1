@@ -16,6 +16,14 @@ from dss.ui.components import display_network
 def page() -> None:
     st.set_page_config(page_title="Centrality Analysis", layout="wide")
 
+    
+    st.title("Centrality Analysis")
+    init_state()
+    G = get_state("graph")
+    if G is None:
+        st.info("No graph loaded.  Please upload a `.mtx` file on the Upload page.")
+        return
+
     st.markdown("""
         ## Centrality Analysis – Quick User Guide
 
@@ -71,12 +79,6 @@ def page() -> None:
     st.markdown("""
     ---
     """)
-    st.title("Centrality Analysis")
-    init_state()
-    G = get_state("graph")
-    if G is None:
-        st.info("No graph loaded.  Please upload a `.mtx` file on the Upload page.")
-        return
     # Compute or retrieve centrality result
     if get_state("centrality_result") is None:
         result = compute_centrality_result(G)
