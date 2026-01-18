@@ -21,6 +21,9 @@ def init_state() -> None:
         "community_results": {},  # keyed by method
         "kemeny_result": None,
         "arrest_result": None,
+        # Auth
+        "auth_ok": False,
+        "auth_user": None,
     }
     for key, value in defaults.items():
         if key not in st.session_state:
