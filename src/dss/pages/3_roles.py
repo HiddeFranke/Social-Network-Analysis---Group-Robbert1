@@ -21,41 +21,78 @@ def page() -> None:
         st.info("No graph loaded.  Please upload a `.mtx` file on the Upload page.")
         return
     # Sidebar parameters
+    st.sidebar.header("Role identification methods")
+    method = st.sidebar.selectbox("Method", ["Cooper and Barahona", "RoleSim", "RoleSim*", "RolX"], index=0)
+    info = {}
+
     st.sidebar.header("Role similarity parameters")
-    signature = st.sidebar.selectbox("Structural signature", ["k-hop", "random-walk"], index=0)
-    if signature == "k-hop":
-        k = st.sidebar.slider("Max hop (k)", 1, 5, 3)
-        t = 3
+    if method == "Cooper and Barahona":
+        info["signature"] = st.sidebar.selectbox("Structural signature", ["k-hop", "random-walk"], index=0)
+        if info["signature"] == "k-hop":
+            info["k"] = st.sidebar.slider("Max hop (k)", 1, 5, 3)
+            info["t"] = 3
+        else:
+            info["t"] = st.sidebar.slider("Random-walk steps (t)", 1, 5, 3)
+            info["k"] = 3
+        info["similarity_metric"] = st.sidebar.selectbox("Similarity metric", ["cosine", "correlation"], index=0)
+    
+    if method == "RoleSim" or method == "RoleSim*":
+        info["beta"] = st.sidebar.slider("beta (decay factor)", 0., 1., 0.1)
+        if method == "RoleSim*":
+            info["lambd"] = st.sidebar.slider("lambda (weight balancing factor)", 0., 1.,0.8)
+        info["maxiter"] = st.sidebar.slider("Maximum number of iterations",5,1000,100)
+
+    st.sidebar.header("Role identification")
+    if method == "Cooper and Barahona" or method == "RoleSim" or method == "RoleSim*": 
+        info["clustering_method"] = st.sidebar.selectbox("Role identification method", ["spectral", "hierarchical"], index=0)
+
+    auto_roles = st.sidebar.checkbox("Auto-detect number of roles", value=True)
+    if auto_roles:
+        info["n_roles"] = None
     else:
-        t = st.sidebar.slider("Random-walk steps (t)", 1, 5, 3)
-        k = 3
-    similarity_metric = st.sidebar.selectbox("Similarity metric", ["cosine", "correlation"], index=0)
-    clustering_method = st.sidebar.selectbox("Clustering method", ["spectral", "hierarchical"], index=0)
-    auto_clusters = st.sidebar.checkbox("Auto-detect number of clusters", value=True)
-    if auto_clusters:
-        n_clusters = None
-    else:
-        n_clusters = st.sidebar.slider("Number of clusters", 2, max(2, int(np.ceil(np.sqrt(G.number_of_nodes())))), 4)
+        info["n_roles"] = st.sidebar.slider("Number of roles", 2, max(2, int(np.ceil(np.sqrt(G.number_of_nodes())))), 4)
+
+    '''
     compute_button = st.sidebar.button("Compute roles")
     if compute_button or get_state("role_result") is None:
         # Compute centralities for summary statistics
         centralities = compute_centralities(G)
         role_result = compute_roles(
             G,
+            method=method,
             signature=signature,
             k=k,
             t=t,
             similarity_metric=similarity_metric,
             clustering_method=clustering_method,
-            n_clusters=n_clusters,
+            n_clusters=n_roles,
             centrality_table=centralities,
         )
         set_state("role_result", role_result)
     else:
         role_result = get_state("role_result")
+    '''
+
+    compute_button = st.sidebar.button("Compute roles")
+    if compute_button or get_state("role_result") is None:
+        # Compute centralities for summary statistics
+        centralities = compute_centralities(G)
+        role_result = compute_roles(
+            G,
+            method=method,
+            info=info,
+            centralities=centralities
+        )
+        set_state("role_result", role_result)
+    else:
+        role_result = get_state("role_result")
+
     # Display similarity heatmap
     st.subheader("Role similarity heatmap")
-    display_heatmap(role_result.similarity_matrix, list(G.nodes()), caption="Role similarity")
+    if method == "RolX":
+        st.text('RolX does not compute similarity scores in such a manner that role similarity can be compared in the usual form')
+    else:
+        display_heatmap(role_result.similarity_matrix, list(G.nodes()), caption="Role similarity")
     # Display role summary
     st.subheader("Role cluster summary")
     st.dataframe(role_result.summary)
@@ -85,6 +122,8 @@ def page() -> None:
         data = centralities.loc[selected_nodes].copy()
         data["role_cluster"] = [role_result.labels[n] for n in selected_nodes]
         st.dataframe(data)
+
+        
     # Compare roles to communities if available
     st.subheader("Comparison with community clustering")
     comm_method = st.selectbox("Community method for comparison", ["louvain", "girvan_newman", "spectral"], index=0)
