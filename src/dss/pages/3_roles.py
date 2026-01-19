@@ -72,8 +72,8 @@ def page() -> None:
     else:
         role_result = get_state("role_result")
     '''
-
-    compute_button = st.sidebar.button("Compute roles")
+    if method != "RolX":
+        compute_button = st.sidebar.button("Compute roles")
     if compute_button or get_state("role_result") is None:
         # Compute centralities for summary statistics
         centralities = compute_centralities(G)
