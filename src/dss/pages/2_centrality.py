@@ -452,17 +452,17 @@ Selected nodes will:
     )
     # Show information for selected nodes
     if selected_nodes:
-        st.subheader("Selected node details")
+        st.subheader("Selected node details", help="""
+            # This section shows the exact metric values for the nodes you selected in the sidebar.
+            
+            # Use it to compare nodes side-by-side and understand *why* a node scores high or low
+            # under different metrics and aggregation settings.
+            # """,
+        )
         info_df = df.loc[selected_nodes].copy()
         info_df["combined"] = combined.loc[selected_nodes]
         st.dataframe(
             info_df,
-#             help="""
-# This section shows the exact metric values for the nodes you selected in the sidebar.
-
-# Use it to compare nodes side-by-side and understand *why* a node scores high or low
-# under different metrics and aggregation settings.
-# """,
         )
 
     
