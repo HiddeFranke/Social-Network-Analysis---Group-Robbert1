@@ -102,9 +102,6 @@ def page() -> None:
     with st.expander("Quick User Guide", expanded=False):
         st.markdown(
             """
-         
-            """,
-        )
     
         **Estimated number of effective arrests**   
         The effective arrests are  the number of arrests possible that realistically can be carried out, considering the cross department edges.  
