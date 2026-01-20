@@ -99,37 +99,37 @@ def page() -> None:
         st.info("No graph loaded.  Please upload a `.mtx` file on the Upload page.")
         return
 
-    with st.expander("Quick User Guide", expanded=False):
-        st.markdown(
-        """
-            **Estimated number of effective arrests**   
-            The effective arrests are  the number of arrests possible that realistically can be carried out, considering the cross department edges.  
+    # with st.expander("Quick User Guide", expanded=False):
+    #     st.markdown(
+    #     """
+    #         **Estimated number of effective arrests**   
+    #         The effective arrests are  the number of arrests possible that realistically can be carried out, considering the cross department edges.  
             
-            **Visualisation**  
-            The network shows the result of the arrest optimisation. Nodes are colourd by deparment assignment, and the risky edges are highligted in red.
-            This helps indentify critcal members and risky edges.  
-        """
-        )
+    #         **Visualisation**  
+    #         The network shows the result of the arrest optimisation. Nodes are colourd by deparment assignment, and the risky edges are highligted in red.
+    #         This helps indentify critcal members and risky edges.  
+    #     """
+    #     )
             
-        st.markdown("### Edges across departments")
-        st.markdown(
-        """
-        These edges are considered risky because they connect members from different departments.
+    #     st.markdown("### Edges across departments")
+    #     st.markdown(
+    #     """
+    #     These edges are considered risky because they connect members from different departments.
 
-        **Table**  
-        This table list the risky edges connecting members from department 1 to department 2. 
+    #     **Table**  
+    #     This table list the risky edges connecting members from department 1 to department 2. 
 
-                    """)
-        with col_right:
-            st.markdown("### Adjust paramets in sidebar")
-            with st.expander("Centrality Methods Details", expanded=False):
-                st.markdown("""
+    #                 """)
+    #     with col_right:
+    #         st.markdown("### Adjust paramets in sidebar")
+    #         with st.expander("Centrality Methods Details", expanded=False):
+    #             st.markdown("""
                
-                """)
+    #             """)
 
-            with st.expander("Clustering Methods Details", expanded=False):
-                st.markdown("""
-               """)
+    #         with st.expander("Clustering Methods Details", expanded=False):
+    #             st.markdown("""
+    #            """)
 
     if get_state("centrality_result") is None:
         centrality_result = compute_centrality_result(G)
