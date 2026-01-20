@@ -81,7 +81,7 @@ def page() -> None:
     # ---
     # """)
         # --- Quick User Guide (collapsible, starts closed) ---
-    st.markdown("---")
+    # st.markdown("---")
 
     with st.expander("Quick User Guide", expanded=False):
         st.markdown(
@@ -138,7 +138,7 @@ def page() -> None:
                 """,
             )
 
-    st.markdown("---")
+    # st.markdown("---")
 
     # Compute or retrieve centrality result
     if get_state("centrality_result") is None:
