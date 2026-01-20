@@ -117,11 +117,19 @@ def page() -> None:
             "Nodes", options=list(G.nodes()), default=[]
         )
         # Highlight nodes that are selected
-        highlight_nodes = selected_nodes
+        # highlight_nodes = selected_nodes
+        highlight_nodes_selected = list(selected_nodes)
+        # display_network(
+        #     G,
+        #     node_color=role_colors,
+        #     highlight=highlight_nodes,
+        #     title="Roles",
+        #     show_labels=True,
+        # )
         display_network(
             G,
             node_color=role_colors,
-            highlight=highlight_nodes,
+            highlight_selected=highlight_nodes_selected,
             title="Roles",
             show_labels=True,
         )
