@@ -17,6 +17,7 @@ def _compute_edge_weights(
     communities: Dict[Any, int],
     centrality: Optional[pd.Series] = None,
     alpha: float = 1.0,
+    beta: float = 1.0,
 ) -> Dict[Tuple[Any, Any], float]:
     """Compute weights for each edge based on community and centrality.
 
@@ -36,24 +37,33 @@ def _compute_edge_weights(
     """
     weights: Dict[Tuple[Any, Any], float] = {}
     # Scale centrality to [0, 1] if provided
-    if centrality is not None:
-        max_c = centrality.max()
-        min_c = centrality.min()
-        denom = max_c - min_c if max_c != min_c else 1.0
-        scaled_c = {n: (centrality[n] - min_c) / denom for n in G.nodes()}
-    else:
-        scaled_c = {n: 0.0 for n in G.nodes()}
+    # if centrality is not None:
+    max_c = centrality.max()
+    min_c = centrality.min()
+    denom = max_c - min_c if max_c != min_c else 1.0
+    scaled_c = {n: (centrality[n] - min_c) / denom for n in G.nodes()}
+    # else:
+    #     scaled_c = {n: 0.0 for n in G.nodes()}
+
     for u, v in G.edges():
         w = 1.0
         # Increase weight if nodes are in same community
         if communities.get(u) == communities.get(v):
             w += alpha
         # Increase further by centrality contributions
-        if centrality is not None:
-            w += alpha * (scaled_c[u] + scaled_c[v])
+        # if centrality is not None:
+        # w += alpha * (scaled_c[u] + scaled_c[v])
+        w += beta * (scaled_c[u] + scaled_c[v])
         weights[(u, v)] = w
     return weights
 
+def compute_effective_arrests(n: int, risk_edges: List[Tuple[Any, Any]], weights: Dict[Tuple[Any, Any], float]) -> float:
+    """Compute the estimated effective arrests based on split edges and their weights."""
+    if not risk_edges:
+        return float(n)
+    max_weight = max(weights.values())
+    reduction = sum(weights[edge] / max_weight for edge in risk_edges)
+    return max(0.0, n - reduction)
 
 def _solve_ilp(
     G: nx.Graph,
@@ -92,11 +102,13 @@ def _solve_ilp(
         cut_edges = sum(1 for (u, v) in G.edges() if assignment[u] != assignment[v])
         obj_val = value(prob.objective)
         risk_edges = [(u, v) for (u, v) in G.edges() if assignment[u] != assignment[v]]
+        effective_arrests = compute_effective_arrests(n, risk_edges, weights)
         return ArrestAssignmentResult(
             assignment=assignment,
             objective=obj_val,
             cut_edges=cut_edges,
-            effective_arrests=float(n - cut_edges),
+            # effective_arrests=float(n - cut_edges),
+            effective_arrests = effective_arrests,
             risk_edges=risk_edges,
         )
     except Exception as e:
@@ -109,6 +121,7 @@ def _heuristic_assignment(
     communities: Dict[Any, int],
     centrality: Optional[pd.Series],
     capacity: int,
+    weights: Dict[Tuple[Any, Any], float],
 ) -> ArrestAssignmentResult:
     """Heuristic assignment when ILP fails.
 
@@ -140,10 +153,10 @@ def _heuristic_assignment(
             dept_counts[dept] += len(members)
         else:
             # Assign highest centrality nodes first
-            if centrality is not None:
-                sorted_members = sorted(members, key=lambda n: centrality.get(n, 0.0), reverse=True)
-            else:
-                sorted_members = members
+            # if centrality is not None:
+            sorted_members = sorted(members, key=lambda n: centrality.get(n, 0.0), reverse=True)
+            # else:
+            #     sorted_members = members
             for m in sorted_members:
                 if dept_counts[dept] < capacity:
                     assignment[m] = dept
@@ -155,13 +168,16 @@ def _heuristic_assignment(
     cut_edges = sum(1 for (u, v) in G.edges() if assignment[u] != assignment[v])
     risk_edges = [(u, v) for (u, v) in G.edges() if assignment[u] != assignment[v]]
     n = len(nodes)
+    effective_arrests = compute_effective_arrests(n, risk_edges, weights)
     return ArrestAssignmentResult(
         assignment=assignment,
         objective=float(cut_edges),
         cut_edges=cut_edges,
-        effective_arrests=float(n - cut_edges),
+        # effective_arrests=float(n - cut_edges),
+        effective_arrests = effective_arrests,
         risk_edges=risk_edges,
     )
+
 
 
 def arrest_assignment(
@@ -195,17 +211,18 @@ def arrest_assignment(
     """
     n = G.number_of_nodes()
     capacity = math.ceil(n / 2)
-    weights = _compute_edge_weights(G, communities, centrality, alpha)
+    weights = _compute_edge_weights(G, communities, centrality, alpha,beta)
     # Try exact ILP solution
     result = _solve_ilp(G, weights, capacity)
-    if result is not None:
-        # Adjust effective arrests using beta
-        result.effective_arrests = float(n - beta * result.cut_edges)
-        return result
+    # if result is not None:
+    #     # Adjust effective arrests using beta
+    #     # result.effective_arrests = float(n - beta * result.cut_edges)
+       
+        # return result
     # Fallback to heuristic
     logger.warning("Falling back to heuristic arrest assignment.")
-    result = _heuristic_assignment(G, communities, centrality, capacity)
-    result.effective_arrests = float(n - beta * result.cut_edges)
+    result = _heuristic_assignment(G, communities, centrality, capacity,weights)
+    # result.effective_arrests = float(n - beta * result.cut_edges)
     return result
 
 
