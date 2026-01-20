@@ -14,6 +14,12 @@ from dss.analytics.roles import compute_roles
 def page() -> None:
     st.set_page_config(page_title="Community Clustering", layout="wide")
     st.title("Community Clustering")
+  
+    init_state()
+    G = get_state("graph")
+    if G is None:
+        st.info("No graph loaded.  Please upload a `.mtx` file on the Upload page.")
+        return
 
     with st.expander("Quick User Guide", expanded=False):
         st.markdown("""
@@ -73,13 +79,6 @@ def page() -> None:
             ARI close to 0 = Community completely changes when perturbation test is applied
             """)
     
-    
-        
-    init_state()
-    G = get_state("graph")
-    if G is None:
-        st.info("No graph loaded.  Please upload a `.mtx` file on the Upload page.")
-        return
     # Sidebar: choose method and parameters
     st.sidebar.header("Community detection parameters")
     # method = st.sidebar.selectbox("Method", ["louvain", "girvan_newman", "spectral"], index=0)
