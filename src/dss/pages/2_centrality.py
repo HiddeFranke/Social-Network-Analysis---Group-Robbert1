@@ -313,7 +313,8 @@ def page() -> None:
     if highlight_bottom:
         highlight_nodes += combined.nsmallest(top_n).index.tolist()
     # Always include explicitly selected nodes in highlight list
-    highlight_nodes += [n for n in selected_nodes if n not in highlight_nodes]
+    # highlight_nodes += [n for n in selected_nodes if n not in highlight_nodes]
+    highlight_nodes_selected = list(selected_nodes)
     st.subheader("Network with node size by aggregated centrality", help="""
     This network visualization shows the graph with node size scaled by the aggregated centrality score.
 
@@ -340,6 +341,16 @@ def page() -> None:
             title="Centrality-scaled network",
             show_labels=True,
         )
+        # display_network(
+        #     G,
+        #     node_size=size_map,
+        #     node_color=color_map,
+        #     highlight_top=highlight_nodes,
+        #     highlight_selected=highlight_nodes_selected,
+        #     title="Centrality-scaled network",
+        #     show_labels=True,
+        # )
+
     # Show information for selected nodes
     if selected_nodes:
         st.subheader("Selected node details", help="""
