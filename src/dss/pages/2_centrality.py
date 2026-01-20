@@ -333,23 +333,23 @@ def page() -> None:
     
     col_left, col_right = st.columns([3, 2], gap="large")
     with col_left:
-        display_network(
-            G,
-            node_size=size_map,
-            node_color=color_map,
-            highlight=highlight_nodes,
-            title="Centrality-scaled network",
-            show_labels=True,
-        )
         # display_network(
         #     G,
         #     node_size=size_map,
         #     node_color=color_map,
-        #     highlight_top=highlight_nodes,
-        #     highlight_selected=highlight_nodes_selected,
+        #     highlight=highlight_nodes,
         #     title="Centrality-scaled network",
         #     show_labels=True,
         # )
+        display_network(
+            G,
+            node_size=size_map,
+            node_color=color_map,
+            highlight_top=highlight_nodes,
+            highlight_selected=highlight_nodes_selected,
+            title="Centrality-scaled network",
+            show_labels=True,
+        )
 
     # Show information for selected nodes
     if selected_nodes:
