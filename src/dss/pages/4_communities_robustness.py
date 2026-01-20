@@ -103,14 +103,6 @@ def page() -> None:
 #        get_state("community_results")[method] = comm_result
  #   comm_result = get_state("community_results")[method]
     
-    # Display summary
-    st.subheader("Community summary")
-    st.write(f"Modularity Q: {comm_result.modularity:.3f}")
-    st.dataframe(comm_result.summary)
-    # Network plot coloured by communities with node selection
-    community_colors = {node: comm_result.labels[node] for node in G.nodes()}
-    st.subheader("Network coloured by communities")
-        
     # Robustness analysis
     runs = st.sidebar.slider("Number of perturbation runs", 10, 100, 50, help = "Select amount of perturbation runs, more runs = more certainty.")
     p = st.sidebar.slider("Fraction of edges to remove", 0.01, 0.30, 0.05, 0.01, help = "Select fraction of edged to be removes, more removal = more drastic changes to network.")
@@ -118,20 +110,33 @@ def page() -> None:
         robustness_result = perturbation_test(G, method=method, p=p, runs=runs, k=(k or 2))
         set_state("robustness_result", robustness_result)
     robustness_result = get_state("robustness_result")
-    
+
     # Allow user to select nodes for inspection
     st.sidebar.subheader("Select nodes to inspect", )
     selected_nodes = st.sidebar.multiselect(
         "Nodes", options=list(G.nodes()), default=[], help = "Select nodes based on number in the graph."
     )
     highlight_nodes = selected_nodes
-    display_network(
-        G,
-        node_color=community_colors,
-        highlight=highlight_nodes,
-        title=f"Communities ({method})",
-        show_labels=True,
-    )
+    
+    # Display summary
+    col_stats, col_plot = st.columns(2)
+    with col_stats:
+        st.subheader("Community summary")
+        st.write(f"Modularity Q: {comm_result.modularity:.3f}")
+        st.dataframe(comm_result.summary)
+        
+    with col_plot:
+        # Network plot coloured by communities with node selection
+        community_colors = {node: comm_result.labels[node] for node in G.nodes()}
+        st.subheader("Network coloured by communities")   
+        display_network(
+            G,
+            node_color=community_colors,
+            highlight=highlight_nodes,
+            title=f"Communities ({method})",
+            show_labels=True,
+        )
+    
     # Show details for selected nodes
     if selected_nodes:
         st.subheader("Selected node details")
