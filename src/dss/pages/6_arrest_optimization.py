@@ -98,7 +98,48 @@ def page() -> None:
     if G is None:
         st.info("No graph loaded.  Please upload a `.mtx` file on the Upload page.")
         return
+    with st.expander("Quick User Guide", expanded=False):
+        col_left, col_right = st.columns([3, 2], gap="large")
+
+        with col_left:
+            st.markdown("### Arrest optimization Summary")
+                        
+            st.markdown("### Optimisation results")
+            
+            st.markdown(
+        """          
+        **Objective value**   
+        This value value indicates how good the optimisation run is. Higher values mean a better result.  
     
+        **Estimated number of effective arrests**   
+        The effective arrests are  the number of arrests possible that realistically can be carried out, considering the cross department edges.  
+        
+        **Visualisation**  
+        The network shows the result of the arrest optimisation. Nodes are colourd by deparment assignment, and the risky edges are highligted in red.
+        This helps indentify critcal members and risky edges.  
+        """
+        )
+            
+            st.markdown("### Edges across departments")
+            st.markdown(
+        """
+        These edges are considered risky because they connect members from different departments.
+
+        **Table**  
+        This table list the risky edges connecting members from department 1 to department 2. 
+
+                    """)
+        with col_right:
+            st.markdown("### Adjust paramets in sidebar")
+            with st.expander("Centrality Methods Details", expanded=False):
+                st.markdown("""
+               
+                """)
+
+            with st.expander("Clustering Methods Details", expanded=False):
+                st.markdown("""
+               """)
+
     if get_state("centrality_result") is None:
         centrality_result = compute_centrality_result(G)
         set_state("centrality_result", centrality_result)
@@ -169,36 +210,29 @@ def page() -> None:
         "Select nodes to inspect", options=list(G.nodes()), default=[]
         )
     
-    if st.sidebar.button("Compute arrest assignment") or get_state("arrest_result") is None:
+    # if st.sidebar.button("Compute arrest assignment") or get_state("arrest_result") is None:
         # Compute community labels
-        if get_state("community_results").get(comm_method) is None:
-            comm_result = compute_communities(G, method=comm_method, k=2)
-            get_state("community_results")[comm_method] = comm_result
-        comm_result = get_state("community_results")[comm_method]
-        communities = comm_result.labels
-        
-        # Centrality scores
-        if cent_method == "Single method":
-            centrality_scores = df[centrality_metric]
-        else:
-            centrality_scores = combined
-        # Compute assignment
-        arrest_result = arrest_assignment(G, communities, centrality_scores, alpha=alpha, beta=beta)
-        set_state("arrest_result", arrest_result)
+    if get_state("community_results").get(comm_method) is None:
+        comm_result = compute_communities(G, method=comm_method, k=2)
+        get_state("community_results")[comm_method] = comm_result
+    comm_result = get_state("community_results")[comm_method]
+    communities = comm_result.labels
+    
+    # Centrality scores
+    if cent_method == "Single method":
+        centrality_scores = df[centrality_metric]
+    else:
+        centrality_scores = combined
+    # Compute assignment
+    arrest_result = arrest_assignment(G, communities, centrality_scores, alpha=alpha, beta=beta)
+    set_state("arrest_result", arrest_result)
     arrest_result = get_state("arrest_result")
     if arrest_result is not None:
         st.write("")
         st.subheader("Optimisation results")
-        st.markdown(
-            f"**Objective value:** {arrest_result.objective:.3f}  \n"
-            "The objective value indicates how good the optimisation run is. Higher values mean a better result."
-        )
-        st.markdown(
-            f"**Estimated number of effective arrests:** {arrest_result.effective_arrests:.1f}  \n"
-            "The effective arrests are the number of arrests possible taking into account the cross department edges."
-        )
+        st.write(f"**Objective value:** {arrest_result.objective:.3f}")
+        st.write(f"**Estimated number of effective arrests:** {arrest_result.effective_arrests:.1f}")
         
-        st.write("This visualization shows the result of the arrest optimisation and the resulting cut.")
         # Display network coloured by department with labels shown.  Nodes
         # assigned to different departments are coloured differently.  Labels
         # allow you to identify specific individuals.
@@ -226,7 +260,6 @@ def page() -> None:
         if arrest_result.risk_edges:
             df_risk = pd.DataFrame(arrest_result.risk_edges, columns=["u", "v"])
             st.subheader("Edges across departments")
-            st.write("The edges that considered risky because they connect members from different departments.")
             st.write(f"Number of Cross‑department edges: {arrest_result.cut_edges}")
             df_risk["Member department 1"] = df_risk.apply(lambda row: row["u"] if arrest_result.assignment[row["u"]] == 0 else row["v"], axis=1)
             df_risk["Member department 2"] = df_risk.apply(lambda row: row["u"] if arrest_result.assignment[row["u"]] == 1 else row["v"], axis=1)
