@@ -89,10 +89,19 @@ def page() -> None:
     # Compute communities
 
     # HIER MOET IETS AANGEPAST WORDEN DAT DE CLUSTERING JUIST WORDT GEUPDATE WANNEER DE SLIDER WORDT GEBRUIKT
-    if get_state("community_results").get(method) is None:
+    cache_key = (method, k)
+
+    if get_state("community_results").get(cache_key) is None:
         comm_result = compute_communities(G, method=method, k=k)
-        get_state("community_results")[method] = comm_result
-    comm_result = get_state("community_results")[method]
+        get_state("community_results")[cache_key] = comm_result
+    comm_result = get_state("community_results")[cache_key]
+
+    
+ #   if get_state("community_results").get(method) is None:
+ #       comm_result = compute_communities(G, method=method, k=k)
+#        get_state("community_results")[method] = comm_result
+ #   comm_result = get_state("community_results")[method]
+    
     # Display summary
     st.subheader("Community summary")
     st.write(f"Modularity Q: {comm_result.modularity:.3f}")
