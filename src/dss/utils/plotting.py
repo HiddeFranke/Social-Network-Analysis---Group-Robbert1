@@ -646,7 +646,7 @@ def plot_network(
         # Try to push this highlight layer above earlier collections
         if draw_last:
             try:
-                ax.collections[-1].set_zorder(10)
+                ax.collections[-1].set_zorder(6)
             except Exception:
                 pass
 
@@ -742,6 +742,7 @@ def plot_network(
                 ha="center",
                 va="center",
                 color="white",
+                zorder=20,
             )
 
     if title:
