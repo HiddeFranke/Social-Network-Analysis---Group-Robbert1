@@ -210,6 +210,7 @@ def page() -> None:
         # assigned to different departments are coloured differently.  Labels
         # allow you to identify specific individuals.
         dept_colors = {node: arrest_result.assignment[node] for node in G.nodes()}
+        highlight_nodes_selected = list(selected_nodes)
         display_network(
             G,
             node_color=dept_colors,
@@ -217,7 +218,8 @@ def page() -> None:
             #add risky edges to plot 
             removed_edges=arrest_result.risk_edges,
             show_labels=True,
-            highlight=selected_nodes
+            # highlight=selected_nodes
+            highlight_selected=highlight_nodes_selected,
         )
 
         team_colors = { 0: "#440154", 1: "#FDE725" }
