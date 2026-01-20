@@ -111,7 +111,11 @@ def page() -> None:
                 st.info("Graph is not connected.  Analyses will operate on the entire graph but some metrics (e.g. Kemeny) will use the largest component.")
             # Plot the graph
             st.subheader("Network Graph")
-            display_network(G, title="Base network")
+            
+            col_left, col_right = st.columns([3, 2], gap="large")
+            with col_left:
+                display_network(G, title="Base network")
+                
         except Exception as e:
             st.error(f"Failed to load network: {e}")
     else:
