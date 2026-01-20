@@ -126,9 +126,10 @@ def plot_network(
     if highlight_nodes:
         nodelist = list(highlight_nodes)
         highlight_sizes = [sizes[list(G.nodes()).index(n)] for n in nodelist]
-        highlight_colours = [colours[list(G.nodes()).index(n)] for n in nodelist]
-        import streamlit as st
-        st.write(f"highlight_colours ={highlight_colours}")
+        # highlight_colours = [colours[list(G.nodes()).index(n)] for n in nodelist]
+        # import streamlit as st
+        # st.write(f"highlight_colours ={highlight_colours}")
+        highlight_colours = ["#ff2fa4" for _ in nodelist]
         nx.draw_networkx_nodes(
             G,
             pos,
