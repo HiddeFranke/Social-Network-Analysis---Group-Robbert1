@@ -131,16 +131,16 @@ Sort by 'combined' to see which nodes are most central according to your chosen 
         ["Weighted sum", "Borda count"],
         index=0,
         help="""
-            Choose how the individual centrality metrics are combined into one final score.
-            
-            Weighted sum:
-            - Uses your slider weights directly.
-            - Higher weight means that metric contributes more to the final score.
-            
-            Borda count:
-            - Turns each metric into a ranking (best to worst).
-            - Combines those rankings into a single overall ranking.
-            """,
+Choose how the individual centrality metrics are combined into one final score.
+
+Weighted sum:
+- Uses your slider weights directly.
+- Higher weight means that metric contributes more to the final score.
+
+Borda count:
+- Turns each metric into a ranking (best to worst).
+- Combines those rankings into a single overall ranking.
+"""
     )
 
     if agg_method == "Weighted sum":
@@ -154,15 +154,15 @@ Sort by 'combined' to see which nodes are most central according to your chosen 
                 1.0,
                 0.1,
                 help=f"""
-                Controls how much *{col}* influences the final combined score.
-                
-                0.0  means this metric is ignored.
-                1.0  means this metric is fully included (relative to the other weights).
-                
-                Tip:
-                If you want the final score to reflect mostly one metric, set that one high
-                and set the others close to 0.
-                """,
+Controls how much *{col}* influences the final combined score.
+
+0.0  means this metric is ignored.
+1.0  means this metric is fully included (relative to the other weights).
+
+Tip:
+If you want the final score to reflect mostly one metric, set that one high
+and set the others close to 0.
+"""
             )
         combined = combine_centralities(df, weights=weight_inputs)
     else:
@@ -180,14 +180,14 @@ Sort by 'combined' to see which nodes are most central according to your chosen 
                 label=str(col),
                 key=key,
                 help=f"""
-                    Include or exclude *{col}* from the Borda aggregation.
-                    
-                    On:
-                    - This metric is used to create a ranking and contributes to the final result.
-                    
-                    Off:
-                    - This metric is ignored completely in the Borda calculation.
-                    """,
+Include or exclude *{col}* from the Borda aggregation.
+
+On:
+- This metric is used to create a ranking and contributes to the final result.
+
+Off:
+- This metric is ignored completely in the Borda calculation.
+"""
             )
 
         combined = borda_count(df, weight_inputs)
@@ -204,14 +204,14 @@ Sort by 'combined' to see which nodes are most central according to your chosen 
         file_name="centrality.csv",
         mime="text/csv",
         help="""
-            Download the current centrality table as a CSV file.
-            
-            The exported file includes:
-            - All centrality metric columns
-            - The current 'combined' score based on your sidebar settings
-            
-            Use this if you want to analyze the results outside the dashboard.
-            """,
+Download the current centrality table as a CSV file.
+
+The exported file includes:
+- All centrality metric columns
+- The current 'combined' score based on your sidebar settings
+
+Use this if you want to analyze the results outside the dashboard.
+"""
     )
     # Highlight controls and node selection
     st.sidebar.header("Highlight and select nodes")
@@ -222,30 +222,30 @@ Sort by 'combined' to see which nodes are most central according to your chosen 
         max_n,
         min(5, max_n),
         help="""
-            Choose how many nodes to highlight as the most or least central.
-            
-            Example:
-            If Top N = 5 and "Highlight top N" is enabled, the 5 highest combined-score nodes
-            will be visually highlighted in the network.
-            """,
+Choose how many nodes to highlight as the most or least central.
+
+Example:
+If Top N = 5 and "Highlight top N" is enabled, the 5 highest combined-score nodes
+will be visually highlighted in the network.
+"""
     )
     highlight_top = st.sidebar.checkbox(
         "Highlight top N",
         value=True,
         help="""
-            Highlights the Top N nodes with the highest combined centrality score in the network view.
-            
-            Use this to quickly identify the most central or influential nodes under your current settings.
-            """,
+Highlights the Top N nodes with the highest combined centrality score in the network view.
+
+Use this to quickly identify the most central or influential nodes under your current settings.
+"""
     )
     highlight_bottom = st.sidebar.checkbox(
         "Highlight bottom N",
         value=False,
         help="""
-            Highlights the Top N nodes with the lowest combined centrality score in the network view.
-            
-            This can help you spot peripheral or weakly connected nodes.
-            """,
+Highlights the Top N nodes with the lowest combined centrality score in the network view.
+
+This can help you spot peripheral or weakly connected nodes.
+"""
     )
     # Node selection for detailed view
     selected_nodes = st.sidebar.multiselect(
@@ -253,12 +253,12 @@ Sort by 'combined' to see which nodes are most central according to your chosen 
         options=list(G.nodes()),
         default=[],
         help="""
-            Select one or more nodes to inspect in detail.
-            
-            Selected nodes will:
-            - Always be highlighted in the network view
-            - Appear in a detailed table at the bottom of this page
-            """,
+Select one or more nodes to inspect in detail.
+
+Selected nodes will:
+- Always be highlighted in the network view
+- Appear in a detailed table at the bottom of this page
+"""
     )
     # Determine highlight nodes: top/bottom plus selected
     highlight_nodes = []
@@ -270,16 +270,16 @@ Sort by 'combined' to see which nodes are most central according to your chosen 
     # highlight_nodes += [n for n in selected_nodes if n not in highlight_nodes]
     highlight_nodes_selected = list(selected_nodes)
     st.subheader("Network with node size by aggregated centrality", help="""
-    This network visualization shows the graph with node size scaled by the aggregated centrality score.
+This network visualization shows the graph with node size scaled by the aggregated centrality score.
 
-    Each node represents an entity in the network. Larger nodes have a higher combined centrality score, meaning they are more important or influential according to the selected aggregation method and weights. Smaller nodes are less central under the same settings.
-    
-    Node colors reflect relative centrality levels, helping you visually distinguish highly central nodes from more peripheral ones. Edges represent connections between nodes.
-    
-    Nodes outlined in red are highlighted based on your sidebar selections, such as the Top N most central nodes, the Bottom N least central nodes, or nodes you selected manually. Highlighted nodes always remain visible, even if multiple highlighting rules apply.
-    
-    Use this view to quickly identify key hubs, bridges, and structurally important nodes, and to understand how changes in weighting or aggregation affect the perceived importance of nodes in the network.
-    """
+Each node represents an entity in the network. Larger nodes have a higher combined centrality score, meaning they are more important or influential according to the selected aggregation method and weights. Smaller nodes are less central under the same settings.
+
+Node colors reflect relative centrality levels, helping you visually distinguish highly central nodes from more peripheral ones. Edges represent connections between nodes.
+
+Nodes outlined in red are highlighted based on your sidebar selections, such as the Top N most central nodes, the Bottom N least central nodes, or nodes you selected manually. Highlighted nodes always remain visible, even if multiple highlighting rules apply.
+
+Use this view to quickly identify key hubs, bridges, and structurally important nodes, and to understand how changes in weighting or aggregation affect the perceived importance of nodes in the network.
+"""
     )
     # Map node sizes and colours
     size_map = combined.to_dict()
@@ -287,14 +287,6 @@ Sort by 'combined' to see which nodes are most central according to your chosen 
     
     col_left, col_right = st.columns([3, 2], gap="large")
     with col_left:
-        # display_network(
-        #     G,
-        #     node_size=size_map,
-        #     node_color=color_map,
-        #     highlight=highlight_nodes,
-        #     title="Centrality-scaled network",
-        #     show_labels=True,
-        # )
         display_network(
             G,
             node_size=size_map,
@@ -308,11 +300,11 @@ Sort by 'combined' to see which nodes are most central according to your chosen 
     # Show information for selected nodes
     if selected_nodes:
         st.subheader("Selected node details", help="""
-            This section shows the exact metric values for the nodes you selected in the sidebar.
-            
-            Use it to compare nodes side-by-side and understand *why* a node scores high or low
-            under different metrics and aggregation settings.
-            """,
+This section shows the exact metric values for the nodes you selected in the sidebar.
+
+Use it to compare nodes side-by-side and understand *why* a node scores high or low
+under different metrics and aggregation settings.
+"""
         )
         info_df = df.loc[selected_nodes].copy()
         info_df["combined"] = combined.loc[selected_nodes]
