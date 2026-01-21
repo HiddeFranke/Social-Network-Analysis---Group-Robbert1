@@ -505,7 +505,7 @@ def page() -> None:
         delta = (after_k - base_k) if kemeny_defined else None
         
     with col_right:
-        
+        pass
         
     with col_left:
         st.markdown("### List of highest impact edges")
