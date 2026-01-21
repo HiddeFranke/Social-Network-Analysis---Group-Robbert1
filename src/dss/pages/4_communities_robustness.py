@@ -88,8 +88,9 @@ def page() -> None:
                 "Girvan Newman": "girvan_newman",
                 "Louvain": "louvain"
                 } 
-    method = st.sidebar.selectbox("Community method", list(comm_method_labels.keys()), 
+    comm_label = st.sidebar.selectbox("Community method", list(comm_method_labels.keys()), 
                                       index=0, help = "Select method of computing community clusters.")
+    method = comm_method_labels[comm_label]
     if method in {"girvan_newman", "spectral"}:
         k = st.sidebar.slider("Number of clusters (k)", 2, max(2, int(G.number_of_nodes() / 2)), 2, help = "Select the number of communities you want to distinct.")
     else:
