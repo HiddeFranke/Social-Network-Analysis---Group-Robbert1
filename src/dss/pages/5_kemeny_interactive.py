@@ -244,6 +244,22 @@ def page() -> None:
         kemeny_defined = after_k == after_k  # not NaN
         delta = (after_k - base_k) if kemeny_defined else None
 
+        st.markdown("### Kemeny constants")
+        st.metric("Kemeny constant (baseline)", f"{base_k:.3f}")
+
+        if kemeny_defined:
+            if selected_widget:
+                    st.metric(
+                        "Kemeny constant (after removals)",
+                        f"{after_k:.3f}",
+                        delta=f"{delta:+.3f}",
+                        delta_color="inverse",  # lower is better -> green when delta is negative
+                    )
+        else:
+            st.warning("Kemeny constant is undefined for the selected removals.")
+
+
+        
     with col_right:
         st.markdown("## Edge impact on Kemeny constant")
         st.markdown("This graph shows the effect each edge has on the Kemeny constant. " \
@@ -392,7 +408,6 @@ def page() -> None:
             show_labels=True,
             removed_edges=ordered_edges,
         )
-
 
 if __name__ == "__main__":
     page()
