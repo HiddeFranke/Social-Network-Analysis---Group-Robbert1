@@ -450,9 +450,6 @@ def page() -> None:
                     3. Observe the Kemeny constant changes and the network structure after removals.
                     4. Use this information to identify critical connections in the network.
                     5. Repeat as necessary to explore different removal strategies.
-
-
-
                     """
             )
         with col_right_guide:
@@ -581,9 +578,9 @@ def page() -> None:
 
         if order:
             st.markdown("### Kemeny constant after each removal", help="""
-                    The order of the removal of certain edges has an impact on the subsequent Kemeny values that the remaining edges contain. 
-                    A certain edge can have a bigger impact on the information network if similar edges have already been removed. 
-                    As such, the following graph shows the inpact of each edge removal per step.
+The order of the removal of certain edges has an impact on the subsequent Kemeny values that the remaining edges contain. 
+A certain edge can have a bigger impact on the information network if similar edges have already been removed. 
+As such, the following graph shows the inpact of each edge removal per step.
             """)
             fig, ax = plt.subplots()
             series = [base_k] + result.history
