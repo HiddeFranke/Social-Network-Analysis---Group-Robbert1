@@ -210,7 +210,7 @@ Selected nodes will:
 - Always be highlighted in the network view
 - Appear in a detailed table at the bottom of this page
 """
-            )
+                )
             # Highlight nodes that are selected
             # highlight_nodes = selected_nodes
             highlight_nodes_selected = list(selected_nodes)
