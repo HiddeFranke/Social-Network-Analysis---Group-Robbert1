@@ -164,20 +164,59 @@ def page() -> None:
     else:
         role_result = get_state("role_result")
     '''
-    compute_button = st.sidebar.button("Compute roles", help="Compute selected role identification method with specified parameters and clustering methods")
+    # compute_button = st.sidebar.button("Compute roles", help="Compute selected role identification method with specified parameters and clustering methods")
+    # if compute_button or get_state("role_result") is None:
+    #     with st.spinner("calculating..."):
+    #         # Compute centralities for summary statistics
+    #         centralities = compute_centralities(G)
+    #         role_result = compute_roles(
+    #             G,
+    #             method=method,
+    #             info=info,
+    #             centralities=centralities
+    #         )
+    #         set_state("role_result", role_result)
+    # else:
+    #     role_result = get_state("role_result")
+
+    compute_button = st.sidebar.button(
+        "Compute roles",
+        help="Compute selected role identification method with specified parameters and clustering methods",
+    )
+    
     if compute_button or get_state("role_result") is None:
-        with st.spinner("calculating..."):
+        progress = st.progress(0)
+        status = st.empty()
+    
+        def progress_cb(p: float, msg: str) -> None:
+            # Clamp progress to [0, 1] and update UI
+            p = max(0.0, min(1.0, float(p)))
+            progress.progress(p)
+            status.write(msg)
+    
+        try:
+            progress_cb(0.02, "Computing centralities")
             # Compute centralities for summary statistics
             centralities = compute_centralities(G)
+    
+            progress_cb(0.08, "Computing roles")
             role_result = compute_roles(
                 G,
                 method=method,
                 info=info,
-                centralities=centralities
+                centralities=centralities,
+                progress_cb=progress_cb,
             )
             set_state("role_result", role_result)
+    
+            progress_cb(1.00, "Finished")
+        finally:
+            # Optional: keep status text, but remove the bar if you prefer
+            # progress.empty()
+            pass
     else:
         role_result = get_state("role_result")
+
 
     if method == "-":
         st.text("RolX does not yet work in the current iteration of this DSS.")
