@@ -30,7 +30,7 @@ def _safe_katz_centrality(G: nx.Graph, alpha: Optional[float] = None, beta: floa
     """
     try:
         # Compute largest eigenvalue of adjacency matrix
-        A = nx.to_scipy_sparse_matrix(G, dtype=float)
+        A = nx.to_scipy_sparse_array(G, dtype=float)
         # Use power iteration to estimate spectral radius
         # Compute singular values; spectral radius <= largest singular value
         u, s, vt = np.linalg.svd(A.toarray(), full_matrices=False)
