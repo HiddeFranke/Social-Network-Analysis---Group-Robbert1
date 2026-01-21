@@ -482,7 +482,7 @@ def page() -> None:
         )
 
     # === FIRST MAIN SPLIT: left controls + constants | right reorder + plot + network ===
-    col_left, col_middle, col_right = st.columns([1, 2, 2])
+    col_left, col_middle, col_right = st.columns([2, 2, 2])
 
     with col_left:
         st.subheader("Remove edges and observe effect on Kemeny")
