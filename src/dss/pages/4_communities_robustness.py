@@ -166,13 +166,33 @@ Visualisation of clustered network with selected method and parameters.
 Different colors represent different communities.
 """
                     )   
+        
+        
+        team_colors = { 0: "#440154", 1: "#FDE725" }
+        team_patches = [mpatches.Patch(color=color, label=f"Dept. {team + 1}") for team, color in team_colors.items()]
+        risky_line = mlines.Line2D([], [], color='red', linestyle='dashed', label='Risky edge')
+        legend_items = team_patches + [risky_line]
+        
+
         display_network(
-            G,
-            node_color=community_colors,
-            highlight_selected=highlight_nodes_selected,
-            title=f"Communities ({method})",
-            show_labels=True,
-        )
+                G,
+                node_color=dept_colors,
+                title="Department assignment",
+                #add risky edges to plot 
+                removed_edges=arrest_result.risk_edges,
+                show_labels=True,
+                # highlight=selected_nodes
+                highlight_selected=highlight_nodes_selected,
+                legend_items = legend_items,
+            )
+        
+       # display_network(
+       #     G,
+      #      node_color=community_colors,
+       #     highlight_selected=highlight_nodes_selected,
+      #      title=f"Communities ({method})",
+       #     show_labels=True,
+      #  )
     
     # Show details for selected nodes
     if selected_nodes:
