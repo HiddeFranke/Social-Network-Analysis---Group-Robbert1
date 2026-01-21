@@ -61,14 +61,14 @@ def main() -> None:
     st.set_page_config(page_title="DSS Social Network Analysis", layout="wide")
     init_state()
 
-    # if not require_login(title="Login - Social Network Analysis"):
-    #     return
+    if not require_login(title="Login - Social Network Analysis"):
+        return
 
-    # st.sidebar.title("Navigation")
+    st.sidebar.title("Navigation")
 
-    # user = get_logged_in_user()
-    # if user:
-    #     st.sidebar.caption(f"Signed in as: {user}")
+    user = get_logged_in_user()
+    if user:
+        st.sidebar.caption(f"Signed in as: {user}")
 
     if st.sidebar.button("Log out"):
         logout()
