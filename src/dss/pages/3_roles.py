@@ -191,34 +191,38 @@ def page() -> None:
         st.subheader("Role cluster summary", help="Summary of averages of the centrality statistics for each of the roles")
         st.dataframe(role_result.summary)
 
-        st.subheader("Leader rankings", help="Which roles are more likely to be leader/follower roles, where the higher the score, the more likely it is that the role to consists of leaders")
-        st.dataframe(leaderranking(role_result.summary))
-        # Colour map for roles
-        role_colors = {node: role_result.labels[node] for node in G.nodes()}
-        # Plot network coloured by roles with labels and interactive highlights
-        st.subheader("Network coloured by roles", help="Visual representation of the network, where each role has its own colour")
-        # Node selection for highlight and inspection
-        st.sidebar.subheader("Select nodes to inspect")
-        selected_nodes = st.sidebar.multiselect(
-            "Nodes", options=list(G.nodes()), default=[]
-        )
-        # Highlight nodes that are selected
-        # highlight_nodes = selected_nodes
-        highlight_nodes_selected = list(selected_nodes)
-        # display_network(
-        #     G,
-        #     node_color=role_colors,
-        #     highlight=highlight_nodes,
-        #     title="Roles",
-        #     show_labels=True,
-        # )
-        display_network(
-            G,
-            node_color=role_colors,
-            highlight_selected=highlight_nodes_selected,
-            title="Roles",
-            show_labels=True,
-        )
+        col_left, col_right = st.columns([2, 3])
+        with col_left:
+            st.subheader("Leader rankings", help="Which roles are more likely to be leader/follower roles, where the higher the score, the more likely it is that the role to consists of leaders")
+            st.dataframe(leaderranking(role_result.summary))
+            # Colour map for roles
+            role_colors = {node: role_result.labels[node] for node in G.nodes()}
+        with col_right:
+            # Plot network coloured by roles with labels and interactive highlights
+            st.subheader("Network coloured by roles", help="Visual representation of the network, where each role has its own colour")
+            # Node selection for highlight and inspection
+            st.sidebar.subheader("Select nodes to inspect")
+            selected_nodes = st.sidebar.multiselect(
+                "Nodes", options=list(G.nodes()), default=[]
+            )
+            # Highlight nodes that are selected
+            # highlight_nodes = selected_nodes
+            highlight_nodes_selected = list(selected_nodes)
+            # display_network(
+            #     G,
+            #     node_color=role_colors,
+            #     highlight=highlight_nodes,
+            #     title="Roles",
+            #     show_labels=True,
+            # )
+            display_network(
+                G,
+                node_color=role_colors,
+                highlight_selected=highlight_nodes_selected,
+                title="Roles",
+                show_labels=True,
+            )
+            
         #role_colors = { 0: "#440154", 1: "#FDE725", 2: "#218855", 3: "#5B39C8", 4: "#BF1515", 5: "#1BACEE" }
         #role_patches = [mpatches.Patch(color=color, label=f"Role {role + 1}") for role, color in role_colors.items()]
 
