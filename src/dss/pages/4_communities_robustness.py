@@ -3,7 +3,6 @@
 import streamlit as st
 import pandas as pd
 from sklearn.metrics import adjusted_rand_score, normalized_mutual_info_score
-from collections import defaultdict
 
 from dss.ui.state import init_state, get_state, set_state
 from dss.analytics.communities import compute_communities
