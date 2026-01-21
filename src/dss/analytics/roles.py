@@ -432,7 +432,7 @@ def transform_roles(roles,n_roles):
 def compute_rolx(G,n_roles,centrality_table):
     nodes = list(G.nodes())
     role_extractor = RoleExtractor(n_roles=n_roles)
-    role_extractor.extract_role_factors(centrality_table.drop('katz',axis=1))
+    role_extractor.extract_role_factors(centrality_table)
     labels = transform_roles(role_extractor.roles,n_roles)
     # Compute summary statistics per role
     if centrality_table is None:
@@ -443,6 +443,17 @@ def compute_rolx(G,n_roles,centrality_table):
     summary["size"] = df.groupby("role").size()
     # Create RoleResult
     return RoleResult(similarity_matrix=None, labels=labels, summary=summary)
+
+def leaderranking(df):
+    sizes = df['size']
+    df = df.drop('size',axis=1)
+    maxima = df.max()
+    points = [10,10,10,10,10,10]
+    scores = np.zeros(df.shape)
+    for i in range(len(scores[0,:])):
+        for j in range(len(scores[:,0])):
+            scores[j,i] = points[i]*(df.iloc[j,i]/maxima.iloc[i])
+    return pd.DataFrame(scores.T).mean()
 
 def compute_roles(G,method,centralities,info):
     if method == "Cooper and Barahona":
