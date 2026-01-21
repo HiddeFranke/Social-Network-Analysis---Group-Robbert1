@@ -14,7 +14,11 @@ from dss.analytics.roles import compute_roles
 
 def page() -> None:
     st.set_page_config(page_title="Community Clustering", layout="wide")
-    st.title("Community Clustering")
+    st.title("Community Clustering", help="""
+    On this page the network can be divided up into multiple clusters.
+    Each of these clusters have more communication within the cluster than outside of the cluster.
+    It can be used to detect different factions of the network.
+    """)
   
     init_state()
     G = get_state("graph")
