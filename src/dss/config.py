@@ -31,6 +31,9 @@ class Defaults:
     # Default layout for network plots
     layout: str = "spring"
 
+    # Spacing multiplier for network layouts (higher = more separation)
+    layout_spacing: float = 1.6
+    
     # Random seed for reproducibility
     seed: int = 55
 
