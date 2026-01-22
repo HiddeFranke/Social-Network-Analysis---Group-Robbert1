@@ -51,8 +51,35 @@ def page() -> None:
         three of these methods work by computing a similarity matrix, which can then be used for clustering, where the clustering assigns
         the roles. RolX groups nodes together with use of feature vectors, and assigns roles to these groups. Furthermore, this page
         creates leadership rankings for each of the computed roles, to find which roles consist of leaders and which consist of followers.
-        When possible, options are provided to adjust each of these methods to suit the user's needs, like adjusting
-        the number of roles, the distance metric used, the signature used, and adjusting parameter values.
+        When possible, options are provided to adjust each of these methods to suit the user's needs. Below we provide these methods:
+
+        1. Select method out of Cooper and Barahona, RoleSim, RoleSim*, and RolX.
+        2. Select role similarity parameters:
+
+        **Cooper and Barahona:**
+        * Select structural signature: k-hop or random walk.
+        * Select number of hops/steps, to decide how long path lengths can be to be included in creating the similarity matrix.
+        * Select similarity metric: cosine or correlation, which are functions used to measure distance of similarity between nodes.
+        
+        **RoleSim**:
+        * Select value of beta (decay factor), where higher values result in less information being used, as well as a higher baseline value for the RoleSim score.
+        * Select maximum number of iterations, where it can go both lower and higher. Lower number of iterations can result in loss of accuracy if convergence not reached, yet it does improve computation time. Higher number of iterations result in the opposite effect if convergence not reached. Use with caution.
+        
+        **RoleSim***:
+        * Select value of beta (decay factor), where higher values result in less information being used, as well as a higher baseline value for the RoleSim* score.
+        * Select maximum number of iterations, where it can go both lower and higher. Lower number of iterations can result in loss of accuracy if convergence not reached, yet it does improve computation time. Higher number of iterations result in the opposite effect if convergence not reached. Use with caution.
+        * Select value of lambda (weight balancing factor), higher values result in more importance given to edges in the matching, while lower values result in higher importance of edges outside the matchinig. Read documentation for more detailed description of this variable.
+        
+        **RolX** does not make use of any role similarity parameters, so can continue to the next step immediately.
+
+        3. Select role identification methods and parameters:
+        * Select role identification method, which performs the clustering with the similarity matrix provided by the methods. Not applicable for RolX, as the role identification method is built in.
+        * Set number of roles manually or select auto-detect number of roles. Maximum number of roles for RolX is set to 6, as there are 6 features and there cannot be more roles than features present.
+        4. Click compute button, where RoleSim and RoleSim* have significantly larger computation time than other methods.
+        * Check role cluster summary, to find mean values of centrality measures over all the nodes within the role.
+        * Check leader rankings, to find which roles are more likely to consist of leadership nodes.
+        * Check network graph, to visualise the network and find where in the network roles are present. Darker colours indicate lower role numbers and vice versa for higher role numbers.
+        * Check community clustering comparison, to obtain some comparative information of role assignment and community clustering, with a table that shows number of nodes in cluster that have certain role.
         
         ## Community Detection & Robustness
         
