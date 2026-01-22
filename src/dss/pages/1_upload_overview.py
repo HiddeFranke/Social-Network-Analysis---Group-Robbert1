@@ -25,23 +25,19 @@ def page() -> None:
     with st.expander("Quick User Guide", expanded=False):
         st.markdown(
             """
-                ### Welcome
+                #### Welcome
                 
                 This dashboard allows you to analyze network structures using advanced graph-based methods.  
                 Everything starts by uploading a network file.
                 
-                ---
-                
-                ### What to upload
+                #### What to upload
                 
                 Upload a **Matrix Market (.mtx)** file that represents a network adjacency matrix.
                 
                 - Each row and column corresponds to a node  
                 - Non-zero values indicate connections between nodes  
-                
-                ---
-                
-                ### What happens next
+               
+                #### What happens next
                 
                 After uploading the file:
                 
@@ -49,16 +45,12 @@ def page() -> None:
                 - All analysis pages in the navigation menu become available  
                 - Centrality, roles, communities, robustness, and optimization analyses can be performed  
                 
-                ---
-                
-                ### No file uploaded yet
+                #### No file uploaded yet
                 
                 If no file is uploaded, the analysis pages remain inactive.  
                 Once a valid `.mtx` file is provided, you can immediately continue with the next steps.
                 
-                ---
-                
-                ### Tip
+                #### Tip
                 
                 If you are unsure about the file format or interpretation of results, consult the **User Manual** in the navigation menu for detailed explanations and examples.
             """
