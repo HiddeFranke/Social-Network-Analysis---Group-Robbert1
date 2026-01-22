@@ -1,10 +1,10 @@
-# """Compute and cache graph layouts."""
+"""Compute and cache graph layouts."""
 
-# from typing import Dict, Any
-# import networkx as nx
-# import numpy as np
-# from ..utils.caching import cache_data
-# from ..config import DEFAULTS
+from typing import Dict, Any
+import networkx as nx
+import numpy as np
+from ..utils.caching import cache_data
+from ..config import DEFAULTS
 
 
 # @cache_data
