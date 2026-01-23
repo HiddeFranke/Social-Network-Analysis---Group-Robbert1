@@ -411,13 +411,26 @@ def plot_network(
             else:
                 edge_values_list.append(0.0)
 
-        edge_values = np.array(edge_values_list, dtype=float)
+        # edge_values = np.array(edge_values_list, dtype=float)
 
-        max_abs = float(np.max(np.abs(edge_values)))
-        if max_abs > 0:
-            edge_vmin, edge_vmax = -max_abs, max_abs
+        # max_abs = float(np.max(np.abs(edge_values)))
+        # if max_abs > 0:
+        #     edge_vmin, edge_vmax = -max_abs, max_abs
+        # else:
+        #     edge_vmin, edge_vmax = -1.0, 1.0
+        
+        edge_values = np.array(edge_values_list, dtype=float)
+        
+        if edge_values.size == 0:
+            edge_values = None
+            edge_vmin = edge_vmax = None
         else:
-            edge_vmin, edge_vmax = -1.0, 1.0
+            max_abs = float(np.max(np.abs(edge_values)))
+            if max_abs > 0:
+                edge_vmin, edge_vmax = -max_abs, max_abs
+            else:
+                edge_vmin, edge_vmax = -1.0, 1.0
+        
 
     # -------------------------
     # Draw base nodes (face colours from colormap)
