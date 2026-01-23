@@ -707,11 +707,11 @@ Selected nodes will:
         if G.is_directed():
                  comm_method = st.selectbox(
             "Community method for comparison", ["spectral","louvain", "girvan_newman"], index=0
-        )
+                 )
         else:
                  comm_method = st.selectbox(
             "Community method for comparison", ["spectral", "girvan_newman"], index=0
-        )
+                 )
              
         # comm_method = st.selectbox(
         #     "Community method for comparison", ["spectral","louvain", "girvan_newman"], index=0
