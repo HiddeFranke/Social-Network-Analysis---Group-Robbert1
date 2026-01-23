@@ -79,7 +79,8 @@ def page() -> None:
             adjacency = load_mtx(uploaded_file)
             # st.write(adjacency)
             # Build graph (assume undirected by default)
-            G = build_graph(adjacency, directed=False)
+            # G = build_graph(adjacency, directed=False)
+            G = build_graph(adjacency)
             # Validate graph
             stats = validate_graph(G)
             # Store in session state
