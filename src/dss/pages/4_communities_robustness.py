@@ -87,11 +87,17 @@ def page() -> None:
     # Sidebar: choose method and parameters
     st.sidebar.header("Community detection parameters")
     # method = st.sidebar.selectbox("Method", ["louvain", "girvan_newman", "spectral"], index=0)
-    comm_method_labels = {
+    if G.is_directed():
+        comm_method_labels = {
                 "Spectral": "spectral",
                 "Girvan Newman": "girvan_newman",
-                "Louvain": "louvain"
                 } 
+    else:
+        comm_method_labels = {
+                    "Spectral": "spectral",
+                    "Girvan Newman": "girvan_newman",
+                    "Louvain": "louvain"
+                    } 
     comm_label = st.sidebar.selectbox("Community method", list(comm_method_labels.keys()), 
                                       index=0, help = "Select method of computing community clusters.")
     method = comm_method_labels[comm_label]
