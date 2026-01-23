@@ -111,7 +111,8 @@ def build_graph(adjacency: csr_matrix, directed: Optional[bool] = None) -> nx.Gr
         # Self loops have been removed above
         G.add_edge(int(u), int(v))
     import streamlit as st
-    st.write("ASYMMETRIC NNZ:", (adjacency != adjacency.T).nnz)
+    st.write("ASYMMETRIC NNZ:")
+    st.write((adjacency != adjacency.T).nnz)
     return G
 
 
