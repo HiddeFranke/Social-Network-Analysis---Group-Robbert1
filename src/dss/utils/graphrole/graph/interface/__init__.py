@@ -1,13 +1,23 @@
 from typing import List, TypeVar
 
-from graphrole.graph.interface.base import BaseGraphInterface
-from graphrole.graph.interface.networkx import NetworkxInterface
+# from graphrole.graph.interface.base import BaseGraphInterface
+# from graphrole.graph.interface.networkx import NetworkxInterface
+
+# # IgraphInterface should not be imported if igraph is not installed
+# try:
+#     from graphrole.graph.interface.igraph import IgraphInterface
+# except ImportError:
+#     pass
+
+from dss.utils.graphrole.graph.interface.base import BaseGraphInterface
+from dss.utils.graphrole.graph.interface.networkx import NetworkxInterface
 
 # IgraphInterface should not be imported if igraph is not installed
 try:
-    from graphrole.graph.interface.igraph import IgraphInterface
+    from dss.utils.graphrole.graph.interface.igraph import IgraphInterface
 except ImportError:
     pass
+
 
 INTERFACES = {
     'networkx': NetworkxInterface,
