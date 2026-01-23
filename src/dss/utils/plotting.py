@@ -300,7 +300,6 @@ import numpy as np
 #     return fig
 
 
-
 def plot_network(
     G: nx.Graph,
     pos: Dict[Any, np.ndarray],
@@ -435,129 +434,193 @@ def plot_network(
     )
 
     # -------------------------
-    # Draw edges (optionally colored)
+    # Highlight layers (outlines only)
     # -------------------------
-    if edge_values is not None:
-        nx.draw_networkx_edges(
+    def _draw_highlight_layer(
+        nodes: Iterable[Any],
+        *,
+        outline_color: str,
+        outline_width: float,
+        draw_last: bool = False,
+    ) -> None:
+        """Draw a highlight overlay for a set of nodes.
+
+        This overlay:
+        - Keeps the original face colour (colormap-based)
+        - Adds a coloured outline using edgecolors + linewidths
+
+        draw_last can be used to ensure the overlay appears above previously
+        drawn overlays if nodes are in multiple highlight sets.
+        """
+        nodelist = [n for n in nodes if n in idx_map]
+        if not nodelist:
+            return
+
+        highlight_sizes = [float(sizes[idx_map[n]]) for n in nodelist]
+        highlight_face = [float(colours[idx_map[n]]) for n in nodelist]
+
+        nx.draw_networkx_nodes(
             G,
             pos,
-            edgelist=edges,
-            edge_color=edge_values,
-            edge_cmap=plt.get_cmap(cmap),
-            edge_vmin=edge_vmin,
-            edge_vmax=edge_vmax,
+            nodelist=nodelist,
+            node_size=highlight_sizes,
+            node_color=highlight_face,
+            cmap=cmap,
+            vmin=vmin,
+            vmax=vmax,
+            edgecolors=outline_color,
+            linewidths=outline_width,
             ax=ax,
-            arrows=G.is_directed(),
-            arrowstyle="-|>",
-            arrowsize=12,
+        )
+
+        # Try to push this highlight layer above earlier collections
+        if draw_last:
+            try:
+                ax.collections[-1].set_zorder(6)
+            except Exception:
+                pass
+
+    # Layer 1: computed highlights (Top N, Bottom N, etc) with red outline
+    if highlight_nodes:
+        _draw_highlight_layer(
+            highlight_nodes,
+            outline_color="red",
+            outline_width=2.0,
+            draw_last=False,
+        )
+
+    # Layer 2: user-selected nodes with pink outline only (no face recolour)
+    # Draw after red so pink wins if a node is in both sets.
+    if highlight_nodes_selected:
+        _draw_highlight_layer(
+            highlight_nodes_selected,
+            outline_color="#ff2fa4",
+            outline_width=2.6,
+            draw_last=True,
+        )
+
+    if highlight_arrested:
+        _draw_highlight_layer(
+            highlight_arrested,
+            outline_color="#0bd63e",
+            outline_width=2.6,
+            draw_last=True,
+        )
+    # -------------------------
+    # Draw edges (either heatmap or default)
+    # -------------------------
+    if edge_values is not None:
+        if G.is_directed():
+            norm = plt.Normalize(vmin=edge_vmin, vmax=edge_vmax)
+            cmap_edges = plt.cm.coolwarm
+            edge_rgba = [cmap_edges(norm(float(v))) for v in edge_values]
+
+            nx.draw_networkx_edges(
+                G,
+                pos,
+                edgelist=edges,
+                edge_color=edge_rgba,
+                width=2.5,
+                alpha=0.9,
+                ax=ax,
+                arrows=True,
+                arrowstyle="-|>",
+                arrowsize=16,
+                min_source_margin=6,
+                min_target_margin=6,
+                connectionstyle="arc3,rad=0.0",
+            )
+        else:
+            nx.draw_networkx_edges(
+                G,
+                pos,
+                edgelist=edges,
+                edge_color=edge_values,
+                edge_cmap=plt.cm.coolwarm,
+                edge_vmin=edge_vmin,
+                edge_vmax=edge_vmax,
+                width=2.5,
+                alpha=0.9,
+                ax=ax,
+            )
+
+        # Add colorbar for edge heatmap
+        sm = plt.cm.ScalarMappable(
+            cmap=plt.cm.coolwarm,
+            norm=plt.Normalize(vmin=edge_vmin, vmax=edge_vmax),
+        )
+        sm.set_array([])
+        plt.colorbar(
+            sm,
+            ax=ax,
+            fraction=0.046,
+            pad=0.04,
+            label="Δ Kemeny if edge removed",
         )
     else:
         nx.draw_networkx_edges(
             G,
             pos,
+            alpha=0.5,
             ax=ax,
             arrows=G.is_directed(),
             arrowstyle="-|>",
-            arrowsize=12,
+            arrowsize=16,
+            min_source_margin=6,
+            min_target_margin=6,
+            connectionstyle="arc3,rad=0.0",
         )
 
     # -------------------------
-    # Overlay removed edges (dashed red)
+    # Overlay removed edges (always drawn on top)
     # -------------------------
-    if removed_edges is not None:
+    if removed_edges:
+        dashed: List[Tuple[Any, Any]] = list(removed_edges)
+
+        # If undirected, draw both (u, v) and (v, u) to avoid missing overlays
+        if not G.is_directed():
+            s = set(dashed)
+            s |= {(v, u) for (u, v) in s}
+            dashed = list(s)
+
         nx.draw_networkx_edges(
             G,
             pos,
-            edgelist=list(removed_edges),
-            style="dashed",
-            width=2.0,
-            edge_color="red",
+            edgelist=dashed,
             ax=ax,
+            edge_color="red",
+            width=1.4,
+            alpha=1,
+            style=(0, (2, 6)),
             arrows=G.is_directed(),
             arrowstyle="-|>",
-            arrowsize=12,
+            arrowsize=16,
+            min_source_margin=6,
+            min_target_margin=6,
+            connectionstyle="arc3,rad=0.0",
         )
 
     # -------------------------
-    # Highlight nodes (red outline)
-    # -------------------------
-    if highlight_nodes is not None:
-        highlight_nodes_list = [n for n in highlight_nodes if n in idx_map]
-        if highlight_nodes_list:
-            highlight_sizes = np.array([sizes[idx_map[n]] for n in highlight_nodes_list], dtype=float)
-            nx.draw_networkx_nodes(
-                G,
-                pos,
-                nodelist=highlight_nodes_list,
-                node_size=highlight_sizes,
-                node_color="none",
-                edgecolors="red",
-                linewidths=2.5,
-                ax=ax,
-            )
-
-    # -------------------------
-    # Highlight selected nodes (pink outline only)
-    # -------------------------
-    if highlight_nodes_selected is not None:
-        selected_list = [n for n in highlight_nodes_selected if n in idx_map]
-        if selected_list:
-            selected_sizes = np.array([sizes[idx_map[n]] for n in selected_list], dtype=float)
-            nx.draw_networkx_nodes(
-                G,
-                pos,
-                nodelist=selected_list,
-                node_size=selected_sizes,
-                node_color="none",
-                edgecolors="pink",
-                linewidths=2.5,
-                ax=ax,
-            )
-
-    # -------------------------
-    # Highlight arrested nodes
-    # -------------------------
-    if highlight_arrested is not None:
-        arrested_list = [n for n in highlight_arrested if n in idx_map]
-        if arrested_list:
-            arrested_sizes = np.array([sizes[idx_map[n]] for n in arrested_list], dtype=float)
-            nx.draw_networkx_nodes(
-                G,
-                pos,
-                nodelist=arrested_list,
-                node_size=arrested_sizes,
-                node_color="none",
-                edgecolors="black",
-                linewidths=3.0,
-                ax=ax,
-            )
-
-    # -------------------------
-    # Optional labels
+    # Labels
     # -------------------------
     if show_labels:
-        if label_dict is None:
-            labels = {n: str(n) for n in nodes_list}
-        else:
-            labels = {n: label_dict.get(n, str(n)) for n in nodes_list}
-
-        # Font sizes scaled with node size to keep proportions.
-        # Use the raw size mapping (if present) to keep scaling stable.
-        if float(sizes_raw.max()) > 0:
-            font_sizes = 6.0 + 6.0 * (sizes_raw / float(sizes_raw.max()))
-        else:
-            font_sizes = np.full_like(sizes_raw, 8.0, dtype=float)
-
-        for n in nodes_list:
-            nx.draw_networkx_labels(
-                G,
-                pos,
-                labels={n: labels[n]},
-                font_size=float(font_sizes[idx_map[n]]),
-                ax=ax,
+        max_raw = float(sizes_raw.max()) if float(sizes_raw.max()) > 0 else 1.0
+        for idx, n in enumerate(nodes_list):
+            x, y = pos[n]
+            fs = 4 + 3 * (float(sizes_raw[idx]) / max_raw)
+            label = label_dict[n] if (label_dict is not None and n in label_dict) else str(n)
+            ax.text(
+                x,
+                y,
+                label,
+                fontsize=float(fs),
+                ha="center",
+                va="center",
+                color="white",
+                zorder=20,
             )
 
-    if title is not None:
+    if title:
         ax.set_title(title)
 
     return fig
