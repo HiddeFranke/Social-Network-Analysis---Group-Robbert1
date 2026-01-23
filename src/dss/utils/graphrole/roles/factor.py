@@ -4,7 +4,7 @@ import numpy as np
 from sklearn.cluster import KMeans
 from sklearn.decomposition import NMF
 
-from graphrole.types import FactorTuple
+from dss.utils.graphrole.types import FactorTuple
 
 
 def get_nmf_decomposition(
