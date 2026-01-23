@@ -4,8 +4,11 @@ from typing import Dict, Iterator, List, Set, TypeVar
 import numpy as np
 from scipy.spatial.distance import pdist
 
-from graphrole.graph.graph import AdjacencyDictGraph
-from graphrole.types import DataFrameDict, DataFrameLike, VectorLike
+# from graphrole.graph.graph import AdjacencyDictGraph
+# from graphrole.types import DataFrameDict, DataFrameLike, VectorLike
+from dss.utils.graphrole.graph.graph import AdjacencyDictGraph
+from dss.utils.graphrole.types import DataFrameDict, DataFrameLike, VectorLike
+
 
 T = TypeVar('T', int, str)
 
