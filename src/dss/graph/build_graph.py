@@ -101,8 +101,6 @@ def build_graph(adjacency: csr_matrix, directed: Optional[bool] = None) -> nx.Gr
     # Determine graph type
     if directed:
         G: nx.Graph = nx.DiGraph()
-        import streamlit as st
-        st.write("DIRECTED")
     else:
         G = nx.Graph()
 
