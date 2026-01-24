@@ -214,7 +214,7 @@ Low within ratio: Community interacts heavily with other communities.
         cols[1].metric(
             "Communities",
             len(comm_result.summary),
-            help="Number of detected communities."
+            help="Number of partitioned communities."
         )
 
         cols[2].metric(
@@ -272,8 +272,32 @@ A robust result indicates that the identified structure reflects meaningful patt
                 )
     st.write("Click on Run Robustness Test in the side bar to (re)run robustness test")
     if robustness_result is not None:
-        st.write(f"Average ARI across runs: {sum(robustness_result.ari_scores) / len(robustness_result.ari_scores):.3f}")
-        st.write(f"Average modularity drop: {sum(robustness_result.modularity_drops) / len(robustness_result.modularity_drops):.3f}")
+        
+        avg_ari = sum(robustness_result.ari_scores) / len(robustness_result.ari_scores)
+        avg_delta_q = sum(robustness_result.modularity_drops) / len(robustness_result.modularity_drops)
+
+        cols = st.columns(3)
+
+        cols[0].metric(
+            "Avg. ARI",
+            f"{avg_ari:.3f}",
+            help="Stability of community assignments under perturbations (1 = very stable)."
+        )
+
+        cols[1].metric(
+            "Avg. Δ Modularity",
+            f"{avg_delta_q:.3f}",
+            help="Average decrease in modularity after edge perturbations."
+        )
+
+        cols[2].metric(
+            "Runs",
+            runs,
+            help="Number of perturbation runs."
+        )
+        
+        #st.write(f"Average ARI across runs: {sum(robustness_result.ari_scores) / len(robustness_result.ari_scores):.3f}")
+        #st.write(f"Average modularity drop: {sum(robustness_result.modularity_drops) / len(robustness_result.modularity_drops):.3f}")
         col_hist, col_box = st.columns(2)
 
         with col_hist:
