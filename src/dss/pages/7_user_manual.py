@@ -84,17 +84,25 @@ def page() -> None:
         ## Community Detection & Robustness
         
         Community detection algorithms partition the network into highly connected
-        subgroups.  The DSS implements Louvain, Girvan–Newman and spectral
+        subgroups. The DSS implements Louvain, Girvan–Newman and spectral
         clustering methods.  For each method the modularity `Q` score and
         cluster statistics are reported.  You can examine robustness by
         repeatedly removing a fraction of edges and observing how the community
         assignments change (ARI) and how modularity drops.
         
-        Comparing community partitions with role clusters helps understand whether
-        structural roles align with densely connected factions.  As with the
-        centrality and roles pages, you can select nodes to highlight them on
-        the community‑coloured plot and view their community and role labels
-        alongside their centrality measures.
+        * **Modularity Q Score**: A measure of how well a network is partitioned into communities.
+        * **Within Ratio**: A measure of how internally connected the communities are, as oposed to connections outside of the community.
+
+        ### Community clustering methods
+        * **Spectral**: Identifies communities by using the eigenvectors of the graph Laplacian to partition the network into weakly connected groups. It is based on minimizing a graph-cut objective and is effective at revealing global structure in the network.
+        * **Girvan-Newman**: Detects communities by repeatedly removing edges with high betweenness centrality, which act as bridges between groups. As these bridging edges are removed, the network splits into increasingly well-defined communities. 
+        * **Louvain**: Detects communities by iteratively grouping nodes to maximize the modularity Q score. It is well suited for large networks and produces a hierarchical community structure.
+
+        ### Robustness Analysis
+        Robustness analysis evaluates how stable the results of a network analysis are when the network is slightly altered or when different methods are applied. 
+        A robust result indicates that the identified structure reflects meaningful patterns rather than noise or modeling choices.
+        * **Perturbation Test**: Assesses robustness by deliberately introducing small changes to the network, in this case removing some of the edges, and re-running the analysis. If the results remain largely unchanged, the detected structure is considered robust.
+        * **Adjusted Rand Index (ARI)**: Measures the similarity between two clusterings while correcting for simularities that could occur by chance. In this context, it is used to quantify how consistently communities are identified under network perturbations.     
         
         ## Kemeny Analysis
         
