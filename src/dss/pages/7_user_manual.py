@@ -125,26 +125,25 @@ def page() -> None:
         
         ## Arrest Optimisation
         
-        The agency has two departments to arrest members of the network.  To
-        maximise arrests and minimise warnings (information leaks), it is
-        preferable that connected members are assigned to the same department and
-        that department capacities (ceil(`N`/2)) are respected【659313343491487†L195-L250】.  This page formulates the
-        problem as a balanced cut optimisation.  You can:
-        
-        * **Select a community detection method** to determine which edges are
-          penalised more heavily when cut.
-        * **Adjust the regret strength (alpha):** Higher values penalise
-          splitting edges within the same community and splitting high‑centrality
-          nodes across departments.
-        * **Adjust the penalty strength (beta):** Determines how many arrests
-          are lost for each warning (cross‑department edge).
-        * **Choose a centrality metric** to weight high‑centrality nodes in the
-          regret term.
-        
-        The page displays the resulting assignment (department 0 or 1) on the
-        network, the objective value, the number of cross‑department edges and
-        the estimated number of effective arrests.  If an integer linear
-        programming solver is unavailable, the DSS falls back to a heuristic.
+        The agency has two departments to arrest members of the network. To maximize arrests and minimize warnings (information leaks), it is preferable that connected members are assigned to the same department and that department capacities (`N/2`, with `N` being the total number of members) are respected.  
+        This page formulates the problem as a balanced cut optimisation, cutting the network into two equal parts and minimizing the number of cross-department edges. If the integer linear programming solver is unavailable, the DSS falls back to a heuristic. On this page you can:
+
+        - **Select a community detection method** to determine which edges are penalised more heavily when cut.
+        - **Adjust the importance of communities (alpha):** Higher values penalise splitting edges within the same community.
+        - **Adjust the importance of centrality (beta):** Higher values penalise splitting high-centrality nodes across departments.
+        - **Choose a centrality metric type:** Select a single or combined centrality method to weight high-centrality nodes:
+          - **Single centrality method:** Choose one metric (Degree, Eigenvector, Katz, Betweenness, Closeness, PageRank).
+          - **Combined centrality method:** Choose between Weighted Sum and Borda Count, and specify the weights or metrics to use.
+        - **Adjust the importance of risky edges (gamma):** Higher values penalise risky cross-department edges more in the priority scores of the members.
+
+        The page displays:
+
+        - The resulting assignment of each node (department 1 or 2).
+        - The objective value of the assignment (lower is better).
+        - The number of cross-department (risky) edges that may cause warnings.
+        - The recommended arrest order, based on the priority score.
+        - The estimated number of effective arrests, accounting for tipped members.
+        - The simulated total effective arrests, resulting from sequential arrest simulation.
         
         ## Recommended Workflow
         
