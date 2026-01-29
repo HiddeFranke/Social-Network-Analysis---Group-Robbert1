@@ -36,8 +36,7 @@ class Defaults:
     layout_spacing: float = 2.7
 
     # Random seed for reproducibility
-    #seed: int = 55
-    seed: int = 36
+    seed: int = 55
 
 
 DEFAULTS = Defaults()
