@@ -213,20 +213,6 @@ def page() -> None:
     else:
         role_result = get_state("role_result")
     '''
-    # compute_button = st.sidebar.button("Compute roles", help="Compute selected role identification method with specified parameters and clustering methods")
-    # if compute_button or get_state("role_result") is None:
-    #     with st.spinner("calculating..."):
-    #         # Compute centralities for summary statistics
-    #         centralities = compute_centralities(G)
-    #         role_result = compute_roles(
-    #             G,
-    #             method=method,
-    #             info=info,
-    #             centralities=centralities
-    #         )
-    #         set_state("role_result", role_result)
-    # else:
-    #     role_result = get_state("role_result")
 
     compute_button = st.sidebar.button(
         "Compute roles",
@@ -278,12 +264,6 @@ def page() -> None:
     if method == "-":
         st.text("RolX does not yet work in the current iteration of this DSS.")
     else:
-        # Display similarity heatmap
-        #st.subheader("Role similarity heatmap",help="Heatmap with use of the similarity matrix. Can become hard to identify nodes when the number of nodes grow")
-        #if method == "RolX":
-        #    st.text('RolX does not compute similarity scores in such a manner that role similarity can be compared in the usual form')
-        #else:
-        #    display_heatmap(role_result.similarity_matrix, list(G.nodes()), caption="Role similarity")
         # Display role summary
         st.subheader("Role cluster summary", help="Summary of averages of the centrality statistics for each of the roles")
         st.dataframe(role_result.summary)
@@ -304,16 +284,6 @@ def page() -> None:
                 help="Visual representation of the network, where each role has its own colour. A darker colour means a lower role number, and vice versa for higher role numbers.",
             )
             # Node selection for highlight and inspection
-#             st.sidebar.subheader("Select nodes to inspect")
-#             selected_nodes = st.sidebar.multiselect(
-#                 "Nodes", options=list(G.nodes()), default=[], help="""
-# Select one or more nodes to inspect in detail.
-
-# Selected nodes will:
-# - Always be highlighted in the network view
-# - Appear in a detailed table at the bottom of this page
-# """
-#                 )
             selected_nodes = st.sidebar.multiselect(
                 "Select nodes to inspect",
                 options=list(G.nodes()),
@@ -327,15 +297,8 @@ Selected nodes will:
 """
             )
             # Highlight nodes that are selected
-            # highlight_nodes = selected_nodes
             highlight_nodes_selected = list(selected_nodes)
-            # display_network(
-            #     G,
-            #     node_color=role_colors,
-            #     highlight=highlight_nodes,
-            #     title="Roles",
-            #     show_labels=True,
-            # )
+
             display_network(
                 G,
                 node_color=role_colors,
@@ -344,13 +307,6 @@ Selected nodes will:
                 show_labels=True,
             )
 
-        #role_colors = { 0: "#440154", 1: "#FDE725", 2: "#218855", 3: "#5B39C8", 4: "#BF1515", 5: "#1BACEE" }
-        #role_patches = [mpatches.Patch(color=color, label=f"Role {role + 1}") for role, color in role_colors.items()]
-
-        #legend_items = role_patches
-        #plt.legend(handles=legend_items, loc="upper right")
-        #st.pyplot(plt.gcf())
-        # Show details for selected nodes
         if selected_nodes:
             st.subheader(
                 "Selected node details",
@@ -377,9 +333,6 @@ Selected nodes will:
             "Community method for comparison", ["spectral","louvain", "girvan_newman"], index=0
                  )
              
-        # comm_method = st.selectbox(
-        #     "Community method for comparison", ["spectral","louvain", "girvan_newman"], index=0
-        # )
         # Compute community result (cached per method)
         if get_state("community_results").get(comm_method) is None:
             comm_result = compute_communities(G, method=comm_method, k=2)
