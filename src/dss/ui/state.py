@@ -77,7 +77,6 @@ def set_state(key: str, value: Any) -> None:
 
 
 if __name__ == "__main__":
-    # Demonstrate usage in a non-Streamlit context
-    # (This will not actually persist between runs)
+    # Demonstrate usage
     init_state()
     print(st.session_state)
