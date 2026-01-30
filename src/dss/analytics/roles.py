@@ -132,7 +132,17 @@ def _compute_similarity_matrix(
 ) -> np.ndarray:
     """Compute a similarity matrix from feature vectors.
 
-    Returns a square matrix of pairwise similarities in the range [0, 1].
+    Parameters
+    ----------
+    features: ndarray
+        Array of shape (n_samples, n_features) containing feature vectors.
+    metric: str, optional
+        Similarity measure: "cosine" or "correlation".
+
+    Returns
+    -------
+    ndarray
+        A square matrix of pairwise similarities in the range [0, 1].
     """
     features = np.asarray(features, dtype=float)
     features = np.nan_to_num(features, nan=0.0, posinf=0.0, neginf=0.0)
