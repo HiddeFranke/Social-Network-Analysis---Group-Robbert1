@@ -73,6 +73,7 @@ def init_state() -> None:
         "community_results": {},
         "kemeny_result": None,
         "arrest_result": None,
+        "kemeny_edge_selected_state", [],
         # Auth
         "auth_ok": False,
         "auth_user": None,
@@ -107,6 +108,7 @@ def clear_graph_state() -> None:
         "community_results",
         "kemeny_result",
         "arrest_result",
+        "kemeny_edge_selected_state",
         "removed_edges",
         "highlight_top",
         "highlight_selected",
