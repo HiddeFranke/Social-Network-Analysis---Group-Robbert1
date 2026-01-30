@@ -125,7 +125,7 @@ def page() -> None:
     comm_result = get_state("community_results")[cache_key]
     
     # Robustness analysis
-    runs = st.sidebar.slider("Number of perturbation runs", 10, 100, 50, help = "Select amount of perturbation runs. more runs = more certainty.")
+    runs = st.sidebar.slider("Number of perturbation runs", 10, 1000, 50, help = "Select amount of perturbation runs. more runs = more certainty.")
     p = st.sidebar.slider("Fraction of edges to remove", 0.01, 0.30, 0.05, 0.01, help = "Select fraction of edged to be removes, more removal = more drastic changes to network.")
     
     robustness_result = get_state("robustness_result")
