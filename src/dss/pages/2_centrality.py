@@ -291,10 +291,9 @@ Use this view to quickly identify key hubs, bridges, and structurally important 
             size_map = combined.to_dict()
             color_map = combined.to_dict()
 
-            if combined.isna().any():
-                st.write("volledig nullen in combined")
+            eps = 1e-12  # tolerance for float noise
+            if combined.fillna(0.0).abs().le(eps).all():
                 highlight_nodes = []
-            st.write(combined)
             
             display_network(
                 G,
