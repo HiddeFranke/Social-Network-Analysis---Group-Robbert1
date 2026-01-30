@@ -21,7 +21,7 @@ def init_state() -> None:
         "community_results": {},
         "kemeny_result": None,
         "arrest_result": None,
-        "kemeny_edge_selected_state", [],
+        "kemeny_edge_selected_state": [],
         # Auth
         "auth_ok": False,
         "auth_user": None,
