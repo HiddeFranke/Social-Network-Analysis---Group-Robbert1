@@ -86,7 +86,6 @@ def page() -> None:
     
     # Sidebar: choose method and parameters
     st.sidebar.header("Community detection parameters")
-    # method = st.sidebar.selectbox("Method", ["louvain", "girvan_newman", "spectral"], index=0)
     if G.is_directed():
         comm_method_labels = {
                 "Spectral": "spectral",
@@ -101,10 +100,7 @@ def page() -> None:
     comm_label = st.sidebar.selectbox("Community method", list(comm_method_labels.keys()), 
                                       index=0, help = "Select method of computing community clusters.")
     method = comm_method_labels[comm_label]
-    # if method in {"girvan_newman", "spectral"}:
-    #     k = st.sidebar.slider("Number of clusters (k)", 2, max(2, int(G.number_of_nodes() / 2)), 2, help = "Select the number of communities you want to distinct.")
-    # else:
-    #     k = None
+    
     if method in {"girvan_newman", "spectral"}:
         max_k = max(2, int(G.number_of_nodes() / 2))
         if max_k <= 2:
@@ -121,20 +117,12 @@ def page() -> None:
         k = None
         
     # Compute communities
-
-    # HIER MOET IETS AANGEPAST WORDEN DAT DE CLUSTERING JUIST WORDT GEUPDATE WANNEER DE SLIDER WORDT GEBRUIKT
     cache_key = (method, k)
 
     if get_state("community_results").get(cache_key) is None:
         comm_result = compute_communities(G, method=method, k=k)
         get_state("community_results")[cache_key] = comm_result
     comm_result = get_state("community_results")[cache_key]
-
-    
- #   if get_state("community_results").get(method) is None:
- #       comm_result = compute_communities(G, method=method, k=k)
-#        get_state("community_results")[method] = comm_result
- #   comm_result = get_state("community_results")[method]
     
     # Robustness analysis
     runs = st.sidebar.slider("Number of perturbation runs", 10, 100, 50, help = "Select amount of perturbation runs. more runs = more certainty.")
@@ -162,17 +150,6 @@ def page() -> None:
         )
         set_state("robustness_result", robustness_result)
     
-    
-   # if st.sidebar.button("Run robustness test", help = "(re)run robustness test and update changes."):
-   #     robustness_result = perturbation_test(G, method=method, p=p, runs=runs, k=(k or 2))
-   #     set_state("robustness_result", robustness_result)
-   # robustness_result = get_state("robustness_result")
-
-    # Allow user to select nodes for inspection
-    # st.sidebar.subheader("Select nodes to inspect", )
-    # selected_nodes = st.sidebar.multiselect(
-    #     "Nodes", options=list(G.nodes()), default=[], help = "Select nodes based on number in the graph."
-    # )
     selected_nodes = st.sidebar.multiselect(
         "Select nodes to inspect",
         options=list(G.nodes()),
@@ -224,11 +201,7 @@ Low within ratio: Community interacts heavily with other communities.
         )
 
         st.dataframe(comm_result.summary)
-        
-        
-        #st.write(f"Modularity Q: {comm_result.modularity:.3f}")
-        #st.dataframe(comm_result.summary)
-        
+
     with col_plot:
         # Network plot coloured by communities with node selection
         community_colors = {node: comm_result.labels[node] for node in G.nodes()}
@@ -295,9 +268,7 @@ A robust result indicates that the identified structure reflects meaningful patt
             runs,
             help="Number of perturbation runs."
         )
-        
-        #st.write(f"Average ARI across runs: {sum(robustness_result.ari_scores) / len(robustness_result.ari_scores):.3f}")
-        #st.write(f"Average modularity drop: {sum(robustness_result.modularity_drops) / len(robustness_result.modularity_drops):.3f}")
+    
         col_hist, col_box = st.columns(2)
 
         with col_hist:
@@ -313,27 +284,6 @@ A robust result indicates that the identified structure reflects meaningful patt
                 title="Modularity drop distribution",
                 ylabel="ΔQ",
             )
-        
-    # Compare to roles
-#    st.subheader("Comparison with role clustering")
-    # Compute role result if not already
-#    if get_state("role_result") is None:
- #       from dss.analytics.centrality import compute_centralities
-#        centrality_table = compute_centralities(G)
- #       role_result = compute_roles(G, centrality_table=centrality_table)
-#        set_state("role_result", role_result)
-#    role_result = get_state("role_result")
-#    role_labels_list = [role_result.labels[node] for node in G.nodes()]
-#    comm_labels_list = [comm_result.labels[node] for node in G.nodes()]
-#    ari = adjusted_rand_score(role_labels_list, comm_labels_list)
-#    nmi = normalized_mutual_info_score(role_labels_list, comm_labels_list)
-#    st.write(f"Adjusted Rand Index between roles and communities: {ari:.3f}")
-#    st.write(f"Normalized Mutual Information: {nmi:.3f}")
-    
-#    import pandas as pd  # imported here to avoid top-level import issues
-#    confusion = pd.crosstab(pd.Series(role_labels_list, name="role"), pd.Series(comm_labels_list, name="community"))
-#    st.dataframe(confusion)
-
 
 if __name__ == "__main__":
     page()
