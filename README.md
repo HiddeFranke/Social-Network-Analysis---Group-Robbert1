@@ -27,7 +27,7 @@ Create a local file at `.streamlit/secrets.toml`:
 ```toml
 [auth]
 username = "Robbert"
-password = "change-me"
+password = "Group1"
 ```
 
 ### 4) Run the dashboard
@@ -173,3 +173,7 @@ The container uses Python 3.11, installs dependencies, and starts Streamlit.
 ## Third-party code
 
 This repository includes vendored code under `src/dss/utils/graphrole/` (MIT License). See `src/dss/utils/graphrole/LICENSE.txt`.
+
+## Use of Generative AI
+
+This project was developed with limited support from Generative AI tools (for example, large language models) to assist with productivity tasks such as brainstorming, drafting documentation text, and improving code readability through refactoring suggestions. All algorithmic choices, mathematical definitions, experimental design, and final implementation decisions were made by the authors. Any AI-generated suggestions were reviewed, validated, and, where necessary, rewritten by the authors to ensure correctness, reproducibility, and alignment with course requirements. No confidential or personally identifiable data was provided to AI tools.
