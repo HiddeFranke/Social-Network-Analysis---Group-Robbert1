@@ -3,6 +3,14 @@
 A Streamlit-based Decision Support System (DSS) for analysing clandestine or organisational networks.
 Upload a network in Matrix Market (`.mtx`) format and explore node importance, structural roles, communities, robustness, connectivity via the Kemeny constant, and an arrest optimisation workflow.
 
+## Live demo (recommended)
+
+The dashboard is hosted online and can be accessed here:
+https://social-network-analysis-group-robbert1.streamlit.app/
+
+For most users, this is the recommended way to explore the project, since it requires no local setup.  
+If you prefer to run the app locally (for development or experimentation), follow the **Quick start** section below for installation, configuration, and execution instructions.
+
 ## Quick start
 
 ### 1) Create a virtual environment
