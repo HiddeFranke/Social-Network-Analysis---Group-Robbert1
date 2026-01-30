@@ -134,21 +134,11 @@ Assigns nodes to two departments to maximise “effective arrests” and minimis
 │     └─ types.py                 # Dataclasses for typed results passed between modules
 ├─ example_graphs/                # Sample .mtx files for quick testing
 ├─ requirements.txt
-├─ .streamlit/config.toml         # Streamlit theme settings
-└─ .devcontainer/devcontainer.json# VS Code Dev Container configuration (Python 3.11)
+└─ .streamlit/config.toml         # Streamlit theme settings
 ```
 
 ## Development
-
-### Dev Container (recommended for reproducibility)
-
-This repository includes a VS Code Dev Container configuration. If you use VS Code:
-
-1. Install “Dev Containers”.
-2. Open the repository.
-3. Reopen in container.
-
-The container uses Python 3.11, installs dependencies, and starts Streamlit.
+The code uses Python 3.11, installs dependencies, and starts Streamlit.
 
 ### Code organisation
 
