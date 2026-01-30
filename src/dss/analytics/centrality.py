@@ -101,6 +101,36 @@ def _normalise_columns(df: pd.DataFrame) -> pd.DataFrame:
     return normed
 
 
+# def combine_centralities(df: pd.DataFrame, weights: Optional[Dict[str, float]] = None) -> pd.Series:
+#     """Combine centrality measures using a weighted sum of normalised scores.
+
+#     Parameters
+#     ----------
+#     df: pandas.DataFrame
+#         DataFrame of centrality measures with nodes as index.
+#     weights: dict, optional
+#         Mapping from column name to weight.  If `None`, all columns are
+#         weighted equally.
+
+#     Returns
+#     -------
+#     pandas.Series
+#         Combined scores for each node.
+#     """
+#     normed = _normalise_columns(df)
+#     if weights is None:
+#         weights = {col: 1.0 for col in df.columns}
+#     # Ensure weights sum to 1 for interpretability
+#     total_weight = sum(weights.values())
+#     if total_weight == 0:
+#         weights = {col: 1.0 for col in df.columns}
+#         total_weight = float(len(df.columns))
+#     weights = {col: w / total_weight for col, w in weights.items()}
+#     # Weighted sum
+#     combined = sum(normed[col] * weights.get(col, 0.0) for col in df.columns)
+#     return combined
+
+
 def combine_centralities(df: pd.DataFrame, weights: Optional[Dict[str, float]] = None) -> pd.Series:
     """Combine centrality measures using a weighted sum of normalised scores.
 
@@ -123,26 +153,15 @@ def combine_centralities(df: pd.DataFrame, weights: Optional[Dict[str, float]] =
     # Ensure weights sum to 1 for interpretability
     total_weight = sum(weights.values())
     if total_weight == 0:
-        weights = {col: 1.0 for col in df.columns}
-        total_weight = float(len(df.columns))
+        return pd.Series(0.0, index=df.index)
+
     weights = {col: w / total_weight for col, w in weights.items()}
     # Weighted sum
     combined = sum(normed[col] * weights.get(col, 0.0) for col in df.columns)
     return combined
 
 
-# def borda_count(df: pd.DataFrame) -> pd.Series:
-#     """Aggregate rankings via Borda count.
 
-#     Each centrality measure induces a ranking.  Nodes receive points
-#     according to their rank (higher points for higher rank).  The sum of
-#     points across measures yields an aggregated ranking.  Ties are
-#     handled by assigning the average rank.  The returned Series has
-#     smaller values for better ranks.
-#     """
-#     ranks = df.rank(ascending=False, method="average")
-#     borda_scores = ranks.mean(axis=1)
-#     return borda_scores
 
 def borda_count(
     df: pd.DataFrame,
