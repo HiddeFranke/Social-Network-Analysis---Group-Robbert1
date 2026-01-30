@@ -1,4 +1,3 @@
-# src/dss/ui/auth.py
 """Authentication helpers for the Streamlit DSS.
 
 Uses Streamlit secrets:
@@ -16,11 +15,8 @@ Session state keys (managed via dss.ui.state helpers):
 """
 
 from __future__ import annotations
-
 from typing import Optional, Tuple
-
 import streamlit as st
-
 from dss.ui.state import get_state, set_state
 
 AUTH_OK_KEY = "auth_ok"
