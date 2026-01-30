@@ -166,11 +166,7 @@ def page() -> None:
                     "Spectral": "spectral",
                     "Girvan Newman": "girvan_newman",
                     "Louvain": "louvain"
-                    } 
-    # comm_method_labels = {"Spectral": "spectral",
-    #             "Girvan Newman": "girvan_newman",
-    #             "Louvain": "louvain"
-    #             }
+                    }
     comm_label = st.sidebar.selectbox("Community method", list(comm_method_labels.keys()), index=0, help ="Select the method that detects the communities in the network.")
     comm_method = comm_method_labels[comm_label]
     alpha = st.sidebar.slider("Importance Communities (alpha)", 0.0, 5.0, 1.0, 0.1,help="How important it is to keep members of the same community together. Higher values make the model more likely to keep them together.")
