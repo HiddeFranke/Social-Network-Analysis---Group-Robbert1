@@ -102,7 +102,7 @@ def page() -> None:
     method = comm_method_labels[comm_label]
     
     if method in {"girvan_newman", "spectral"}:
-        max_k = max(2, int(G.number_of_nodes() / 2))
+        max_k = max(2, int(G.number_of_nodes()**0.5))
         if max_k <= 2:
             k = 2
         else:
