@@ -96,36 +96,6 @@ def _random_walk_profiles(G: nx.Graph, t: int = 3) -> np.ndarray:
     return Pt
 
 
-# def _compute_similarity_matrix(
-#     features: np.ndarray,
-#     metric: str = "cosine",
-# ) -> np.ndarray:
-#     """Compute a similarity matrix from feature vectors.
-
-#     Parameters
-#     ----------
-#     features: ndarray
-#         Array of shape (n_samples, n_features) containing feature vectors.
-#     metric: str, optional
-#         Similarity measure: "cosine" or "correlation".
-
-#     Returns
-#     -------
-#     ndarray
-#         A square matrix of pairwise similarities in the range [0, 1].
-#     """
-#     # Compute pairwise distances; convert to similarity
-#     if metric == "cosine":
-#         distances = pairwise_distances(features, metric="cosine")
-#     elif metric == "correlation":
-#         distances = pairwise_distances(features, metric="correlation")
-#     else:
-#         raise ValueError(f"Unknown similarity metric: {metric}")
-#     # Similarity = 1 - distance, but clip to [0, 1]
-#     sim = 1.0 - distances
-#     sim = np.clip(sim, 0.0, 1.0)
-#     return sim
-
 def _compute_similarity_matrix(
     features: np.ndarray,
     metric: str = "cosine",
