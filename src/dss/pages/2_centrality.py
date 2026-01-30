@@ -294,7 +294,8 @@ Use this view to quickly identify key hubs, bridges, and structurally important 
             if combined.isna().any():
                 st.write("volledig nullen in combined")
                 highlight_nodes = []
-    
+            st.write(combined)
+            
             display_network(
                 G,
                 node_size=size_map,
